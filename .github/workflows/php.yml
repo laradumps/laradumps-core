@@ -1,0 +1,50 @@
+name: LaraDumpsCore Tests
+
+on: ['push', 'pull_request']
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        php: [ 8.2, 8.1 ]
+        dependency-version: [ prefer-stable ]
+
+    name: "PHP: ${{ matrix.php }} / ${{ matrix.os }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Setup PHP, with composer and extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: $(composer config cache-files-dir)
+          key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+          restore-keys: dependencies-php-${{ matrix.php }}-composer-
+
+      - name: Install Composer dependencies
+        run: |
+          composer install
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
+
+      - name: Code Style 👨‍🏭
+        run: composer pint
+        if: runner.os == 'Linux'
+        env:
+          PHP_CS_FIXER_IGNORE_ENV: 1
+
+      - name: PHPStan ⚗️
+        run: composer test:types
+        if: runner.os == 'Linux'
+
+      - name: Pest Tests 👨🏻‍🔬
+        run: composer test:tests
