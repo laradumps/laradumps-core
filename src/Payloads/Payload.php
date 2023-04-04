@@ -58,10 +58,8 @@ abstract class Payload
             $ideHandle = $this->customHandle();
         }
 
-        $requestId = uniqid();
-
-        if (defined('LARADUMPS_REQUEST_ID')) {
-            $requestId = defined('LARADUMPS_REQUEST_ID');
+        if (!defined('LARADUMPS_REQUEST_ID')) {
+            define('LARADUMPS_REQUEST_ID', uniqid());
         }
 
         $dateTime = date('H:i:s');
@@ -72,7 +70,7 @@ abstract class Payload
 
         return [
             'id'         => $this->notificationId,
-            'request_id' => $requestId,
+            'request_id' => LARADUMPS_REQUEST_ID,
             'dumpId'     => $this->dumpId,
             'type'       => $this->type(),
             'meta'       => [
