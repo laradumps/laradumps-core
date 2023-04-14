@@ -7,8 +7,9 @@ use LaraDumps\LaraDumpsCore\Support\Dumper;
 
 class BenchmarkPayload extends Payload
 {
-    public function __construct(private mixed $args)
-    {
+    public function __construct(
+        private mixed $args
+    ) {
     }
 
     public function type(): string
@@ -55,7 +56,7 @@ class BenchmarkPayload extends Payload
 
         return [
             'label'  => 'Benchmark',
-            'values' => collect($results)->map(fn ($result, $index) => Dumper::dump($result)),
+            'values' => array_map(fn ($result, $index) => Dumper::dump($result), $results), /** @phpstan-ignore-line  */
         ];
     }
 }

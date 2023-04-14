@@ -18,7 +18,8 @@
         "vlucas/phpdotenv": "^5.5",
         "symfony/var-dumper": "^6.2.7",
         "symfony/console": "^6.2.7",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "nesbot/carbon": "^2.66"
     },
     "require-dev": {
         "laravel/pint": "^1.7",
