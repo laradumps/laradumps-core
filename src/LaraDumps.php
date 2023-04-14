@@ -6,7 +6,20 @@ use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use LaraDumps\LaraDumpsCore\Actions\{Config, InstallLaraDumps, SendPayload, Support};
 use LaraDumps\LaraDumpsCore\Concerns\Colors;
-use LaraDumps\LaraDumpsCore\Payloads\{ClearPayload, CoffeePayload, ColorPayload, DumpPayload, JsonPayload, LabelPayload, Payload, PhpInfoPayload, ScreenPayload, TablePayload, TimeTrackPayload, ValidJsonPayload, ValidateStringPayload};
+use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
+    ClearPayload,
+    CoffeePayload,
+    ColorPayload,
+    DumpPayload,
+    JsonPayload,
+    LabelPayload,
+    Payload,
+    PhpInfoPayload,
+    ScreenPayload,
+    TablePayload,
+    TimeTrackPayload,
+    ValidJsonPayload,
+    ValidateStringPayload};
 use LaraDumps\LaraDumpsCore\Support\Dumper;
 use Ramsey\Uuid\Uuid;
 
@@ -242,5 +255,16 @@ class LaraDumps
 
         $this->send($payload);
         $this->label($reference);
+    }
+
+    /**
+     * Benchmarking
+     */
+    public function benchmark(mixed ...$args): self
+    {
+        $benchmarkPayload = new BenchmarkPayload($args);
+        $this->send($benchmarkPayload);
+
+        return $this;
     }
 }
