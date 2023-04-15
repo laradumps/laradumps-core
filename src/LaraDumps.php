@@ -43,6 +43,25 @@ class LaraDumps
         $this->notificationId = !empty($notificationId) ? $this->notificationId : Uuid::uuid4()->toString();
     }
 
+    protected function beforeWrite($args): \Closure
+    {
+        return function () use ($args) {
+            if (is_string($args) && Support::isJson($args)) {
+                return [
+                    new JsonPayload($args),
+                    uniqid(),
+                ];
+            }
+
+            [$pre, $id] = Dumper::dump($args);
+
+            return [
+                new DumpPayload($pre, $args),
+                $id,
+            ];
+        };
+    }
+
     private function checkForEnvironment(): void
     {
         try {
@@ -79,13 +98,7 @@ class LaraDumps
 
     public function write(mixed $args = null, ?bool $autoInvokeApp = null, array $trace = []): self
     {
-        if (is_string($args) && Support::isJson($args)) {
-            $id      = uniqid();
-            $payload = new JsonPayload($args);
-        } else {
-            [$pre, $id] = Dumper::dump($args);
-            $payload    = new DumpPayload($pre, $args);
-        }
+        [$payload, $id] = $this->beforeWrite($args)();
 
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->dumpId($id);
