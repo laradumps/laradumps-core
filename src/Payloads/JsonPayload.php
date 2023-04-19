@@ -17,8 +17,8 @@ class JsonPayload extends Payload
     public function content(): array
     {
         return [
-            'string'          => $this->string,
-            'originalContent' => $this->string,
+            'string'           => $this->string,
+            'original_content' => $this->string,
         ];
     }
 }

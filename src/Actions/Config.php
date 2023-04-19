@@ -32,7 +32,7 @@ class Config
 
     public static function get(string $key): mixed
     {
-        $value = $_ENV[static::getEnvironment()[$key] ?? null] ?? '';
+        $value = $_ENV[static::getEnvironment()[$key] ?? null] ?? false;
 
         return match ($value) {
             'true'  => true,

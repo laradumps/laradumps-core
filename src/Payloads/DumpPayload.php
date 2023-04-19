@@ -18,8 +18,8 @@ class DumpPayload extends Payload
     public function content(): array
     {
         return [
-            'dump'            => $this->dump,
-            'originalContent' => $this->originalContent,
+            'dump'             => $this->dump,
+            'original_content' => $this->originalContent,
         ];
     }
 }

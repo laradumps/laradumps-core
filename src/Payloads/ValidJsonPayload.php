@@ -6,6 +6,6 @@ class ValidJsonPayload extends Payload
 {
     public function type(): string
     {
-        return 'json-validate';
+        return 'json_validate';
     }
 }

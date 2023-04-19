@@ -10,13 +10,12 @@ class TableV2Payload extends Payload
         protected array $values,
         protected string $headerStyle = '',
         protected string $label = 'Table',
-        protected string $type = 'table-v2'
     ) {
     }
 
     public function type(): string
     {
-        return $this->type ?? 'table-v2';
+        return 'table_v2';
     }
 
     public function content(): array

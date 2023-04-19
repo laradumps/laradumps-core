@@ -43,7 +43,7 @@ class LaraDumps
         $this->notificationId = !empty($notificationId) ? $this->notificationId : Uuid::uuid4()->toString();
     }
 
-    protected function beforeWrite($args): \Closure
+    protected function beforeWrite(mixed $args): \Closure
     {
         return function () use ($args) {
             if (is_string($args) && Support::isJson($args)) {
@@ -249,7 +249,7 @@ class LaraDumps
      */
     public function time(string $reference): void
     {
-        $payload = new TimeTrackPayload();
+        $payload = new TimeTrackPayload($reference);
         $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
@@ -263,11 +263,10 @@ class LaraDumps
      */
     public function stopTime(string $reference): void
     {
-        $payload = new TimeTrackPayload(true);
+        $payload = new TimeTrackPayload($reference, true);
         $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
-        $this->label($reference);
     }
 
     /**

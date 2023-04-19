@@ -14,7 +14,7 @@ class BenchmarkPayload extends Payload
 
     public function type(): string
     {
-        return 'table-v2';
+        return 'table_v2';
     }
 
     public function content(): array
