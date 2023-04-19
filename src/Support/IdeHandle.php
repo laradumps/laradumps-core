@@ -30,16 +30,25 @@ class IdeHandle
             $line       = '';
         }
 
-        $basePath = rtrim(strval(getcwd()), '\/');
-        $path     = str_replace($basePath . DIRECTORY_SEPARATOR, '', strval($path));
+        if (function_exists('base_path')) {
+            $basePath = base_path();
+        } else {
+            $basePath = rtrim(strval(getcwd()), '\/');
+        }
+
+        $path = str_replace($basePath . DIRECTORY_SEPARATOR, '', strval($path));
 
         if (str_contains($path, 'resources')) {
             $path = str_replace('resources/views/', '', strval($path));
         }
 
+        $className = explode('/', $path);
+        $className = end($className);
+
         return [
             'handler' => $fileHandle,
             'path'    => $path,
+            'class'   => $className,
             'line'    => $line,
         ];
     }
