@@ -5,7 +5,7 @@ namespace LaraDumps\LaraDumpsCore\Payloads;
 class ScreenPayload extends Payload
 {
     public function __construct(
-        public string $screenName,
+        public string $name,
         public int $raiseIn = 0,
     ) {
     }
@@ -19,8 +19,8 @@ class ScreenPayload extends Payload
     public function content(): array
     {
         return [
-            'screenName' => $this->screenName,
-            'raiseIn'    => $this->raiseIn,
+            'screen_name' => $this->name,
+            'raise_in'    => $this->raiseIn,
         ];
     }
 }

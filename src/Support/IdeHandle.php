@@ -46,10 +46,10 @@ class IdeHandle
         $className = end($className);
 
         return [
-            'handler' => $fileHandle,
-            'path'    => $path,
-            'class'   => $className,
-            'line'    => $line,
+            'handler'    => $fileHandle,
+            'path'       => $path,
+            'class_name' => $className,
+            'line'       => $line,
         ];
     }
 }
