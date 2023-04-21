@@ -30,12 +30,12 @@ it('should return the correct payload to dump', function () {
     expect($payload)
         ->id->toBe($notificationId)
         ->type->toBe('dump')
-        ->ideHandle->toMatchArray([
+        ->ide_handle->toMatchArray([
             'handler' => 'phpstorm://open?file=Test&line=1',
             'path'    => 'Test',
             'line'    => 1,
         ])
-        ->and($payload['content']['dump'])
+        ->and($payload['dump']['dump'])
         ->toContain(
             '<span class=sf-dump-key>name</span>',
             '<span class=sf-dump-str title="4 characters">Luan</span>'
@@ -65,10 +65,10 @@ it('should return the correct payload to table_v2', function () {
     expect($payload)
         ->id->toBe($notificationId)
         ->type->toBe('table_v2')
-        ->and($payload['content']['values']['Name'])
+        ->and($payload['table_v2']['values']['Name'])
         ->toContain('Anand Pilania')
-        ->and($payload['content']['values']['Email'])
+        ->and($payload['table_v2']['values']['Email'])
         ->toContain('pilaniaanand@gmail.com')
-        ->and($payload['content']['values']['Stack'][0])
+        ->and($payload['table_v2']['values']['Stack'][0])
         ->toContain('Laravel');
 })->group('table_v2');

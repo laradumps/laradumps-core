@@ -43,7 +43,7 @@
         "pint": "./vendor/bin/pint --test",
         "fix": "PHP_CS_FIXER_IGNORE_ENV=1 ./vendor/bin/pint",
         "test:types": "./vendor/bin/phpstan analyse --ansi --memory-limit=-1",
-        "test:tests": "./vendor/bin/pest --parallel --order-by random",
+        "test:tests": "./vendor/bin/pest --order-by random",
         "verify": [
             "@pint",
             "@test:types",

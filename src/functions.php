@@ -5,7 +5,7 @@ use LaraDumps\LaraDumpsCore\LaraDumps;
 use Ramsey\Uuid\Uuid;
 
 if (!function_exists('ds')) {
-    function ds(mixed ...$args): LaraDumps
+    function ds(mixed ...$args): LaraDumps | LaravelLaraDumps
     {
         $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)[0];
 
