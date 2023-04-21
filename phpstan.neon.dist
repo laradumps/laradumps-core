@@ -5,3 +5,5 @@ parameters:
     checkMissingIterableValueType: false
     checkGenericClassInNonGenericObjectType: false
 
+    ignoreErrors:
+        - '#Function [a-zA-Z0-9\\:()]+ has no return type specified.#'
