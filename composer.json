@@ -16,8 +16,8 @@
         "php": "^8.0",
         "ramsey/uuid": "^3.9|^4.7.3",
         "vlucas/phpdotenv": "^5.5",
-        "symfony/var-dumper": "^6.2.7",
-        "symfony/console": "^6.2.7",
+        "symfony/var-dumper": "^5.0|^6.2.7",
+        "symfony/console": "^5.0|^6.2.7",
         "ext-curl": "*",
         "nesbot/carbon": "^2.66"
     },
