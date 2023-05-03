@@ -30,13 +30,7 @@ class IdeHandle
             $line       = '';
         }
 
-        if (function_exists('base_path')) {
-            $basePath = base_path();
-        } else {
-            $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        }
-
-        $path = str_replace($basePath . DIRECTORY_SEPARATOR, '', strval($path));
+        $path = str_replace(appBasePath() . DIRECTORY_SEPARATOR, '', strval($path));
 
         if (str_contains($path, 'resources')) {
             $path = str_replace('resources/views/', '', strval($path));

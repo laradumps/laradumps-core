@@ -13,7 +13,7 @@ final class WriteEnv
         $fileContent = '';
 
         if (empty($filePath)) {
-            $filePath = './.env';
+            $filePath = appBasePath() . DIRECTORY_SEPARATOR . '.env';
         }
 
         if (file_exists($filePath)) {
@@ -64,7 +64,7 @@ final class WriteEnv
         }
 
         if (empty($filePath)) {
-            $filePath = './.env';
+            $filePath = appBasePath() . DIRECTORY_SEPARATOR . '.env';
         }
 
         $fileContent = file_get_contents($filePath);

@@ -23,14 +23,13 @@ class ClearV1ConfigCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $basePath   = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        $configPath = $basePath . 'config' . DIRECTORY_SEPARATOR . 'laradumps.php';
+        $configPath = appBasePath() . 'config' . DIRECTORY_SEPARATOR . 'laradumps.php';
 
         if (file_exists($configPath)) {
             (new Process(['rm', '-r', '-f', $configPath]))->run();
         }
 
-        $dotenv = Dotenv::createImmutable($basePath, '.env');
+        $dotenv = Dotenv::createImmutable(appBasePath(), '.env');
         $dotenv->load();
 
         $keysToComment = [];
