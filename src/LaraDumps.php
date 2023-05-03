@@ -65,7 +65,7 @@ class LaraDumps
     private function checkForEnvironment(): void
     {
         try {
-            $dotenv = Dotenv::createImmutable('./', '.env');
+            $dotenv = Dotenv::createImmutable(appBasePath(), '.env');
             $dotenv->load();
 
             if (empty(Config::get('host')) || Config::get('install') === false) {
