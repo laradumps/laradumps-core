@@ -16,6 +16,7 @@ class Config
             'preferred_ide'             => 'DS_PREFERRED_IDE',
             'send_color_in_screen'      => 'DS_SEND_COLOR_IN_SCREEN',
             'testing'                   => 'DS_RUNNING_IN_TESTS',
+            'installed'                 => 'DS_INSTALLED',
         ];
     }
 
@@ -25,7 +26,9 @@ class Config
             return !in_array($key, [
                 'DS_APP_HOST',
                 'DS_SLEEP',
+                'DS_INSTALLED',
                 'DS_PREFERRED_IDE',
+                'DS_RUNNING_IN_TESTS',
             ]);
         }));
     }

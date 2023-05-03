@@ -33,7 +33,7 @@ class IdeHandle
         if (function_exists('base_path')) {
             $basePath = base_path();
         } else {
-            $basePath = rtrim(strval(getcwd()), '\/');
+            $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         }
 
         $path = str_replace($basePath . DIRECTORY_SEPARATOR, '', strval($path));

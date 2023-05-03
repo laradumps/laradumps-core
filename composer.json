@@ -14,17 +14,17 @@
     ],
     "require": {
         "php": "^8.0",
-        "ramsey/uuid": "^3.9|^4.7.3",
+        "ramsey/uuid": "^3.9|^4.7.4",
         "vlucas/phpdotenv": "^5.5",
-        "symfony/var-dumper": "^5.0|^6.2.7",
-        "symfony/console": "^5.0|^6.2.7",
+        "symfony/var-dumper": "^5.0|^6.0",
+        "symfony/console": "^5.0|^6.0",
         "ext-curl": "*",
         "nesbot/carbon": "^2.66"
     },
     "require-dev": {
-        "laravel/pint": "^1.7",
-        "pestphp/pest": "^2.3",
-        "phpstan/phpstan": "^1.10.8"
+        "laravel/pint": "^1.10",
+        "pestphp/pest": "^2.6",
+        "phpstan/phpstan": "^1.10.14"
     },
     "autoload": {
         "psr-4": {
@@ -50,6 +50,9 @@
             "@test:tests"
         ]
     },
+    "bin": [
+        "bin/laradumps"
+    ],
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true

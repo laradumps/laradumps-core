@@ -20,13 +20,20 @@ class InstallLaraDumps extends Command
         $result = false;
 
         foreach (self::$hosts as $host) {
-            $payload = new InstallationPayload();
+            if (class_exists(\LaraDumps\LaraDumps\Payloads\InstallationPayload::class)) {
+                $installationPayload = \LaraDumps\LaraDumps\Payloads\InstallationPayload::class;
+            } else {
+                $installationPayload = InstallationPayload::class;
+            }
+
+            $payload = new $installationPayload();
             $payload->notificationId(Uuid::uuid4()->toString());
 
             $result = SendPayload::baseUrl($host)->handle($payload->toArray());
 
             if (boolval($result)) {
                 Config::set('host', $host);
+                Config::set('installed', 'false');
 
                 $result = true;
 

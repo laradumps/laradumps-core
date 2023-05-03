@@ -68,7 +68,7 @@ class LaraDumps
             $dotenv = Dotenv::createImmutable('./', '.env');
             $dotenv->load();
 
-            if (empty(Config::get('host'))) {
+            if (empty(Config::get('host')) || Config::get('install') === false) {
                 InstallLaraDumps::install();
             }
         } catch (InvalidPathException) {

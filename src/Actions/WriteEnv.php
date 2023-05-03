@@ -53,4 +53,34 @@ final class WriteEnv
             file_put_contents($filePath, strval($fileContent));
         }
     }
+
+    /**
+     * @throws \Exception
+     */
+    public static function commentOldEnvKeys(string $filePath, array $keysToComment): void
+    {
+        if (!file_exists($filePath)) {
+            throw new \Exception("Error: file '$filePath' not found.");
+        }
+
+        if (empty($filePath)) {
+            $filePath = './.env';
+        }
+
+        $fileContent = file_get_contents($filePath);
+
+        foreach ($keysToComment as $key) {
+            if (!preg_match('/^[0-9a-zA-Z_]+$/i', $key)) {
+                throw new \Exception("Error: '$key' is not a valid .env key.");
+            }
+
+            $key = strtoupper($key);
+
+            $fileContent = preg_replace("/^$key\=.*$/m", "#$0 // laradumps v1", $fileContent);
+
+            $fileContent = preg_replace("/^\h*$key\h*=\h*\R/m", "#$0 // laradumps v1", $fileContent);
+        }
+
+        file_put_contents($filePath, $fileContent);
+    }
 }
