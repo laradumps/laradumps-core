@@ -31,7 +31,7 @@ final class WriteEnv
             $key = strtoupper($key);
 
             //Wrap strings
-            if ((bool)preg_match('/^\d+$/', strval(str_replace('.', '', $value))) === false
+            if ((bool) preg_match('/^\d+$/', strval(str_replace('.', '', $value))) === false
                 && in_array($value, ['true', 'false']) === false
                 && $value != '') {
                 $value = "\"{$value}\"";
@@ -77,9 +77,9 @@ final class WriteEnv
             if (!is_null($fileContent)) {
                 $key = strtoupper($key);
 
-                $fileContent = strval(preg_replace("/^$key\=.*$/m", "#$0 // laradumps v1", $fileContent));
+                $fileContent = strval(preg_replace("/^$key\=.*$/m", '#$0 // laradumps v1', $fileContent));
 
-                $fileContent = preg_replace("/^\h*$key\h*=\h*\R/m", "#$0 // laradumps v1", $fileContent);
+                $fileContent = preg_replace("/^\h*$key\h*=\h*\R/m", '#$0 // laradumps v1', $fileContent);
             }
         }
 

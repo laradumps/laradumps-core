@@ -6,10 +6,11 @@ if (file_exists(__DIR__ . '/../../../autoload.php')) {
 } else if (file_exists(__DIR__ . '/../autoload.php')) {
     include __DIR__ . '/../autoload.php';
 }
+
 use LaraDumps\LaraDumpsCore\Commands\ClearV1ConfigCommand;
 use Symfony\Component\Console\Application;
 
-$application = new Application();
+$application = new Application('LaraDumps Core', 'v1.0.0');
 $application->add(new ClearV1ConfigCommand());
 
 $application->run();

@@ -11,6 +11,7 @@ use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
     CoffeePayload,
     ColorPayload,
     DumpPayload,
+    InstallationPayload,
     JsonPayload,
     LabelPayload,
     Payload,
@@ -276,6 +277,20 @@ class LaraDumps
     {
         $benchmarkPayload = new BenchmarkPayload($args);
         $this->send($benchmarkPayload);
+
+        return $this;
+    }
+
+    public function configure(): static
+    {
+        if (class_exists(\LaraDumps\LaraDumps\Payloads\InstallationPayload::class)) {
+            $installationPayload = \LaraDumps\LaraDumps\Payloads\InstallationPayload::class;
+        } else {
+            $installationPayload = InstallationPayload::class;
+        }
+
+        $installationPayloadInstance = new $installationPayload($_ENV['APP_NAME']);
+        $this->send($installationPayloadInstance);
 
         return $this;
     }
