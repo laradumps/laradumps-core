@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 #[AsCommand(
-    name: 'ds:clear-v1-config',
+    name: 'clear-v1-config',
     description: 'Comment LaraDumps v1 config',
     hidden: false
 )]
