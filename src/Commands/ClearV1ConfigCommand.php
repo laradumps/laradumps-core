@@ -40,7 +40,7 @@ class ClearV1ConfigCommand extends Command
             }
         }
 
-        WriteEnv::commentOldEnvKeys($basePath . '.env', $keysToComment);
+        WriteEnv::commentOldEnvKeys(appBasePath() . '.env', $keysToComment);
 
         $output->writeLn('<info>LaraDumps Config V1 has been successfully commented</info>');
 

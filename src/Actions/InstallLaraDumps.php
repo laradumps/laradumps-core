@@ -2,7 +2,7 @@
 
 namespace LaraDumps\LaraDumpsCore\Actions;
 
-use LaraDumps\LaraDumpsCore\Payloads\InstallationPayload;
+use LaraDumps\LaraDumpsCore\Payloads\{InstallationPayload, Payload};
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 
@@ -26,6 +26,7 @@ class InstallLaraDumps extends Command
                 $installationPayload = InstallationPayload::class;
             }
 
+            /** @var Payload $installationPayload */
             $payload = new $installationPayload();
             $payload->notificationId(Uuid::uuid4()->toString());
 

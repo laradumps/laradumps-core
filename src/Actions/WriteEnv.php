@@ -67,18 +67,20 @@ final class WriteEnv
             $filePath = appBasePath() . '.env';
         }
 
-        $fileContent = file_get_contents($filePath);
+        $fileContent = strval(file_get_contents($filePath));
 
         foreach ($keysToComment as $key) {
             if (!preg_match('/^[0-9a-zA-Z_]+$/i', $key)) {
                 throw new \Exception("Error: '$key' is not a valid .env key.");
             }
 
-            $key = strtoupper($key);
+            if (!is_null($fileContent)) {
+                $key = strtoupper($key);
 
-            $fileContent = preg_replace("/^$key\=.*$/m", "#$0 // laradumps v1", $fileContent);
+                $fileContent = strval(preg_replace("/^$key\=.*$/m", "#$0 // laradumps v1", $fileContent));
 
-            $fileContent = preg_replace("/^\h*$key\h*=\h*\R/m", "#$0 // laradumps v1", $fileContent);
+                $fileContent = preg_replace("/^\h*$key\h*=\h*\R/m", "#$0 // laradumps v1", $fileContent);
+            }
         }
 
         file_put_contents($filePath, $fileContent);
