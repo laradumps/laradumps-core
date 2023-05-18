@@ -32,6 +32,7 @@ final class MakeFileHandler
 
         $keyHandler = str_replace('{filepath}', $filepath . $filename, $keyHandler);
 
+        /** @phpstan-ignore-next-line  */
         return strval(str_replace('{line}', $trace['line'], $keyHandler));
     }
 
