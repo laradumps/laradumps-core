@@ -9,7 +9,7 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 
 class Dumper
 {
-    public static function dump(mixed $arguments): array
+    public static function dump(mixed $arguments, int $maxDepth = null): array
     {
         $id = Uuid::uuid4()->toString();
 
@@ -32,6 +32,12 @@ class Dumper
         $varCloner = new VarCloner();
 
         $dumper = new HtmlDumper();
+
+        if (!empty($maxDepth)) {
+            $dumper->setDisplayOptions([
+                'maxDepth' => $maxDepth,
+            ]);
+        }
 
         $htmlDumper = (string) $dumper->dump($varCloner->cloneVar($arguments), true);
 
