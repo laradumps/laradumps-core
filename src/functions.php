@@ -7,7 +7,13 @@ use Ramsey\Uuid\Uuid;
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
-        return rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        if (str_contains($basePath, 'public' . DIRECTORY_SEPARATOR)) {
+            $basePath = rtrim($basePath, 'public' . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        }
+
+        return $basePath;
     }
 }
 
