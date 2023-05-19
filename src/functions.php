@@ -7,6 +7,10 @@ use Ramsey\Uuid\Uuid;
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
+        if (function_exists('base_path')) {
+            return base_path() . DIRECTORY_SEPARATOR;
+        }
+
         return rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 }
