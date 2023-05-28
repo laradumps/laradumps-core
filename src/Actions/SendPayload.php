@@ -34,13 +34,14 @@ final class SendPayload
         $curlRequest = curl_init();
 
         curl_setopt_array($curlRequest, [
-            CURLOPT_POST           => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/json', 'Accept: application/json'],
-            CURLOPT_POSTFIELDS     => json_encode($payload),
-            CURLOPT_URL            => $this->appUrl,
-            CURLOPT_TIMEOUT        => 1,
+            CURLOPT_POST              => true,
+            CURLOPT_RETURNTRANSFER    => true,
+            CURLOPT_FOLLOWLOCATION    => true,
+            CURLOPT_HTTPHEADER        => ['Content-Type: application/json', 'Accept: application/json'],
+            CURLOPT_POSTFIELDS        => json_encode($payload),
+            CURLOPT_URL               => $this->appUrl,
+            CURLOPT_TIMEOUT           => 1,
+            CURLOPT_CONNECTTIMEOUT_MS => 10,
         ]);
 
         $exec = curl_exec($curlRequest);
