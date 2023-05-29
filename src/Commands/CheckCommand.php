@@ -48,7 +48,7 @@ class CheckCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln('    <info>Laradumps is searching for words used in debugging in: ' . $input->getOption('dir') . '</info>');
+        $output->writeln('    <info>LaraDumps is searching for words used in debugging in: ' . $input->getOption('dir') . '</info>');
 
         if (!empty($input->getOption('dirty'))) {
             $dirtyFiles = GitDirtyFiles::run();
@@ -172,7 +172,7 @@ HTML);
         if (($total = count($matches)) > 0) {
             $totalFiles = count(array_unique(array_column($matches, 'realPath')));
 
-            $errorMessage = ($totalFiles === 1) ? 'error' : 'errors';
+            $errorMessage = ($total === 1) ? 'error' : 'errors';
             $fileMessage  = ($totalFiles === 1) ? 'file' : 'files';
 
             $message = '[ERROR] Found ' . $total . ' ' . $errorMessage . ' / ' . $totalFiles . ' ' . $fileMessage;

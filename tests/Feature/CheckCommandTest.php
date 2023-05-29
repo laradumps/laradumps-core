@@ -32,16 +32,14 @@ it('show message if variable ... is empty', function () {
 
 it('check command work property', function () {
     $commandTester = startCommandApplication([
-        '--dir'          => 'tests/Fixtures',
-        '--ignore-files' => 'tests/Fixtures/ds_env, tests/Fixtures/AnotherFunctionsToCheck.php',
+        '--dir'          => sprintf('tests%sFixtures', DIRECTORY_SEPARATOR),
+        '--ignore-files' => vsprintf('tests%sFixtures%sds_env, tests%sFixtures%sAnotherFunctionsToCheck.php', [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR]),
     ]);
 
     $output = $commandTester->getDisplay();
 
-    dump($output);
-
     expect($output)
-        ->toContain('Laradumps is searching for words used in debugging in: tests/Fixtures')
+        ->toContain('LaraDumps is searching for words used in debugging in: ' . sprintf('tests%sFixtures', DIRECTORY_SEPARATOR))
         ->and($output)
         ->not->toContain('Whoops. Specify the folders you need to search in DS_CHECK_IN_DIR in the comma separated .env file')
         ->toContain('1/3')
@@ -54,20 +52,20 @@ it('check command work property', function () {
             'dd(\'this is a function to check!\')',
             '//ds(\'this is a function to check!\')'
         )
-        ->toContain('[ERROR] Found 2 error / 1 file');
+        ->toContain('[ERROR] Found 2 errors / 1 file');
 });
 
 it('check command with "dump", "dd" work property', function () {
     $commandTester = startCommandApplication([
-        '--dir'          => 'tests/Fixtures',
-        '--ignore-files' => 'tests/Fixtures/ds_env, tests/Fixtures/ExampleClassToCheck.php',
+        '--dir'          => sprintf('tests%sFixtures', DIRECTORY_SEPARATOR),
+        '--ignore-files' => vsprintf('tests%sFixtures%sds_env, tests%sFixtures%sExampleClassToCheck.php', [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR]),
         '--text'         => 'dump,dd',
     ]);
 
     $output = $commandTester->getDisplay();
 
     expect($output)
-        ->toContain('Laradumps is searching for words used in debugging in: tests/Fixtures')
+        ->toContain('LaraDumps is searching for words used in debugging in: ' . sprintf('tests%sFixtures', DIRECTORY_SEPARATOR))
         ->and($output)
         ->not->toContain('Whoops. Specify the folders you need to search in DS_CHECK_IN_DIR in the comma separated .env file')
         ->toContain('1/3')
@@ -76,19 +74,19 @@ it('check command with "dump", "dd" work property', function () {
             'dd(\'this is a function to check!\')',
             '//dd(\'this is a function to check!\')'
         )
-        ->toContain('[ERROR] Found 3 error / 1 file');
+        ->toContain('[ERROR] Found 3 errors / 1 file');
 });
 
 it('check command without "dump", "dd" work property', function () {
     $commandTester = startCommandApplication([
-        '--dir'          => 'tests/Fixtures',
-        '--ignore-files' => 'tests/Fixtures/ds_env, tests/Fixtures/AnotherFunctionsToCheck.php',
+        '--dir'          => sprintf('tests%sFixtures', DIRECTORY_SEPARATOR),
+        '--ignore-files' => vsprintf('tests%sFixtures%sds_env, tests%sFixtures%sAnotherFunctionsToCheck.php', [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR]),
     ]);
 
     $output = $commandTester->getDisplay();
 
     expect($output)
-        ->toContain('Laradumps is searching for words used in debugging in: tests/Fixtures')
+        ->toContain('LaraDumps is searching for words used in debugging in: tests/Fixtures')
         ->and($output)
         ->not->toContain('Whoops. Specify the folders you need to search in DS_CHECK_IN_DIR in the comma separated .env file')
         ->toContain('1/3')
@@ -96,5 +94,5 @@ it('check command without "dump", "dd" work property', function () {
             'ds(\'this is a function to check!\');',
             ' @ds("this is a function to check!")',
         )
-        ->toContain('[ERROR] Found 2 error / 1 file');
+        ->toContain('[ERROR] Found 2 errors / 1 file');
 });
