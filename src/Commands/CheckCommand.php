@@ -25,7 +25,8 @@ class CheckCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('dirty', 'd', InputArgument::OPTIONAL);
+            ->addOption('dirty', 'd', InputArgument::OPTIONAL)
+            ->addArgument('stop-on-failure', InputArgument::OPTIONAL);
     }
 
     /**
@@ -37,6 +38,17 @@ class CheckCommand extends Command
         $dotenv->load();
 
         $dirtyFiles = [];
+
+        $output->writeln('');
+
+        if (empty($_ENV['DS_CHECK_IN_DIR'])) {
+            $output->writeln('  👋️  <error>Whoops. Specify the folders you need to search in DS_CHECK_IN_DIR in the comma separated .env file</error>');
+            $output->writeln('');
+
+            return Command::FAILURE;
+        }
+
+        $output->writeln('    <info>Laradumps is searching for words used in debugging in: ' . $_ENV['DS_CHECK_IN_DIR'] . '</info>');
 
         if (!empty($input->getOption('dirty'))) {
             $dirtyFiles = GitDirtyFiles::run();
@@ -73,7 +85,9 @@ HTML);
 
         $finder = new Finder();
 
-        $finder->files()->in($this->prepareDirectories());
+        $finder->files()
+            ->ignoreVCSIgnored(true)
+            ->in($this->prepareDirectories());
 
         $progressBar = new ProgressBar($output, count($dirtyFiles) ?: $finder->count());
 
@@ -81,6 +95,10 @@ HTML);
 
         foreach ($finder as $file) {
             if ($dirtyFiles && !in_array($file->getRealPath(), $dirtyFiles)) {
+                continue;
+            }
+
+            if (in_array($file->getRealPath(), $this->prepareFilesToIgnore())) {
                 continue;
             }
 
@@ -106,11 +124,7 @@ HTML);
                 foreach ($textToSearch as $search) {
                     $search = ' ' . ltrim($search); // maintaining compatiblity with V1.0.2;
 
-                    if (strpos($lineContent, $search)
-                        || strpos($lineContent, '@' . ltrim($search))
-                        || strpos($lineContent, '//' . ltrim($search))
-                        || strpos($lineContent, '->' . ltrim($search))
-                    ) {
+                    if (strpos($lineContent, $search)) {
                         $contains = true;
 
                         break;
@@ -119,11 +133,14 @@ HTML);
 
                 if ($contains && !$ignore) {
                     $matches[] = $this->saveContent($file, $lineContent, $line);
+
+                    if ($input->getArgument('stop-on-failure')) {
+                        break 2;
+                    }
                 }
             }
         }
 
-        $output->writeln('');
         $output->writeln('');
 
         foreach ($matches as $iterator => $content) {
@@ -182,6 +199,8 @@ HTML
             return Command::FAILURE;
         }
 
+        $output->writeln('');
+
         render(<<<HTML
             <div class="mx-1">
                 No ds() found.
@@ -208,7 +227,22 @@ HTML
         $array = [];
 
         foreach (explode(",", $_ENV['DS_CHECK_IN_DIR']) as $dir) {
-            $array[] = appBasePath() . trim($dir);
+            if (!empty($dir)) {
+                $array[] = appBasePath() . trim($dir);
+            }
+        }
+
+        return $array;
+    }
+
+    private function prepareFilesToIgnore(): array
+    {
+        $array = [];
+
+        foreach (explode(",", $_ENV['DS_CHECK_IGNORE_FILES']) as $dir) {
+            if (!empty($dir)) {
+                $array[] = appBasePath() . trim($dir);
+            }
         }
 
         return $array;
@@ -216,13 +250,33 @@ HTML
 
     private function prepareTextToSearch(): array
     {
-        $array = [];
+        $textToSearch = [];
 
-        foreach (explode(",", $_ENV['DS_CHECK_FOR']) as $search) {
-            $array[] = appBasePath() . trim($search);
+        $default = 'ds,dsq,dsd,ds1,ds2,ds3,ds4,ds5';
+
+        $checkInFor = !empty($_ENV['DS_CHECK_IN_FOR'])
+            ? $_ENV['DS_CHECK_IN_FOR']
+            : '';
+
+        $values = explode(",", $checkInFor);
+
+        $mergedValues = array_unique(array_merge(explode(",", $default), $values));
+
+        foreach ($mergedValues as $search) {
+            $search = trim($search);
+
+            if (strlen($search) > 0) {
+                $textToSearch[] = ' ' . $search;
+                $textToSearch[] = $search;
+                $textToSearch[] = '//' . $search;
+                $textToSearch[] = '->' . $search;
+                $textToSearch[] = $search . '(';
+                $textToSearch[] = '@' . $search;
+                $textToSearch[] = ' @' . $search;
+            }
         }
 
-        return $array;
+        return $textToSearch;
     }
 
     private function prepareTextToIgnore(): array
@@ -230,7 +284,9 @@ HTML
         $array = [];
 
         foreach (explode(",", $_ENV['DS_CHECK_IGNORE']) as $search) {
-            $array[] = appBasePath() . trim($search);
+            if (!empty($search)) {
+                $array[] = $search;
+            }
         }
 
         return $array;

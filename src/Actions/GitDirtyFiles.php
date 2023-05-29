@@ -29,7 +29,7 @@ final class GitDirtyFiles
             $fileName = substr($file, 3);
             $status   = substr($file, 0, 3);
 
-            if (!empty($status) && str_ends_with($status, '  ')) {
+            if (!empty($status) && str_ends_with($status, ' ')) {
                 $status = trim($status);
 
                 if ($status !== 'D') {
