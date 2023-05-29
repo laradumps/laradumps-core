@@ -86,7 +86,7 @@ it('check command without "dump", "dd" work property', function () {
     $output = $commandTester->getDisplay();
 
     expect($output)
-        ->toContain('LaraDumps is searching for words used in debugging in: tests/Fixtures')
+        ->toContain('LaraDumps is searching for words used in debugging in: ' . sprintf('tests%sFixtures', DIRECTORY_SEPARATOR))
         ->and($output)
         ->not->toContain('Whoops. Specify the folders you need to search in DS_CHECK_IN_DIR in the comma separated .env file')
         ->toContain('1/3')
