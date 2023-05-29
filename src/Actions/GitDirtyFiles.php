@@ -21,7 +21,7 @@ final class GitDirtyFiles
         }
 
         $output = $process->getOutput();
-        $lines  = preg_split('/\R+/', $output, -1, PREG_SPLIT_NO_EMPTY);
+        $lines  = (array) preg_split('/\R+/', $output, -1, PREG_SPLIT_NO_EMPTY);
         $files  = [];
 
         foreach ($lines as $file) {
