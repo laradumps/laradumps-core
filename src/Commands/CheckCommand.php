@@ -2,7 +2,6 @@
 
 namespace LaraDumps\LaraDumpsCore\Commands;
 
-use Dotenv\Dotenv;
 use Exception;
 use LaraDumps\LaraDumpsCore\Actions\{GitDirtyFiles, MakeFileHandler};
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -25,7 +24,11 @@ class CheckCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('dirty', 'd', InputArgument::OPTIONAL)
+            ->addOption('dirty', null, InputArgument::OPTIONAL)
+            ->addOption('dir', null, InputArgument::OPTIONAL)
+            ->addOption('ignore', null, InputArgument::OPTIONAL)
+            ->addOption('text', null, InputArgument::OPTIONAL)
+            ->addOption('ignore-files', null, InputArgument::OPTIONAL)
             ->addArgument('stop-on-failure', InputArgument::OPTIONAL);
     }
 
@@ -34,21 +37,18 @@ class CheckCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $dotenv = Dotenv::createImmutable(appBasePath(), '.env');
-        $dotenv->load();
-
         $dirtyFiles = [];
 
         $output->writeln('');
 
-        if (empty($_ENV['DS_CHECK_IN_DIR'])) {
+        if (empty($input->getOption('dir'))) {
             $output->writeln('  👋️  <error>Whoops. Specify the folders you need to search in DS_CHECK_IN_DIR in the comma separated .env file</error>');
             $output->writeln('');
 
             return Command::FAILURE;
         }
 
-        $output->writeln('    <info>Laradumps is searching for words used in debugging in: ' . $_ENV['DS_CHECK_IN_DIR'] . '</info>');
+        $output->writeln('    <info>Laradumps is searching for words used in debugging in: ' . $input->getOption('dir') . '</info>');
 
         if (!empty($input->getOption('dirty'))) {
             $dirtyFiles = GitDirtyFiles::run();
@@ -75,9 +75,9 @@ HTML);
             }
         }
 
-        $ignoreLineWhenContainsText = $this->prepareTextToIgnore();
+        $ignoreLineWhenContainsText = $this->prepareTextToIgnore($input);
 
-        $textToSearch = $this->prepareTextToSearch();
+        $textToSearch = $this->prepareTextToSearch($input);
 
         renderUsing($output);
 
@@ -87,7 +87,7 @@ HTML);
 
         $finder->files()
             ->ignoreVCSIgnored(true)
-            ->in($this->prepareDirectories());
+            ->in($this->prepareDirectories($input));
 
         $progressBar = new ProgressBar($output, count($dirtyFiles) ?: $finder->count());
 
@@ -98,7 +98,7 @@ HTML);
                 continue;
             }
 
-            if (in_array($file->getRealPath(), $this->prepareFilesToIgnore())) {
+            if (in_array($file->getRealPath(), $this->prepareFilesToIgnore($input))) {
                 continue;
             }
 
@@ -122,7 +122,7 @@ HTML);
 
                 /** @var string[] $textToSearch */
                 foreach ($textToSearch as $search) {
-                    $search = ' ' . ltrim($search); // maintaining compatiblity with V1.0.2;
+                    $search = ' ' . ltrim($search); // maintaining compatibility with V1.0.2;
 
                     if (strpos($lineContent, $search)) {
                         $contains = true;
@@ -222,11 +222,11 @@ HTML
         return Command::SUCCESS;
     }
 
-    private function prepareDirectories(): array
+    private function prepareDirectories(InputInterface $input): array
     {
         $array = [];
 
-        foreach (explode(",", $_ENV['DS_CHECK_IN_DIR']) as $dir) {
+        foreach (explode(",", $input->getOption('dir') ?? "") as $dir) {
             if (!empty($dir)) {
                 $array[] = appBasePath() . trim($dir);
             }
@@ -235,11 +235,11 @@ HTML
         return $array;
     }
 
-    private function prepareFilesToIgnore(): array
+    private function prepareFilesToIgnore(InputInterface $input): array
     {
         $array = [];
 
-        foreach (explode(",", $_ENV['DS_CHECK_IGNORE_FILES']) as $dir) {
+        foreach (explode(",", $input->getOption('ignore-files') ?? "") as $dir) {
             if (!empty($dir)) {
                 $array[] = appBasePath() . trim($dir);
             }
@@ -248,15 +248,13 @@ HTML
         return $array;
     }
 
-    private function prepareTextToSearch(): array
+    private function prepareTextToSearch(InputInterface $input): array
     {
         $textToSearch = [];
 
         $default = 'ds,dsq,dsd,ds1,ds2,ds3,ds4,ds5';
 
-        $checkInFor = !empty($_ENV['DS_CHECK_IN_FOR'])
-            ? $_ENV['DS_CHECK_IN_FOR']
-            : '';
+        $checkInFor = $input->getOption('text') ?? "";
 
         $values = explode(",", $checkInFor);
 
@@ -279,11 +277,11 @@ HTML
         return $textToSearch;
     }
 
-    private function prepareTextToIgnore(): array
+    private function prepareTextToIgnore(InputInterface $input): array
     {
         $array = [];
 
-        foreach (explode(",", $_ENV['DS_CHECK_IGNORE']) as $search) {
+        foreach (explode(",", $input->getOption('ignore') ?? "") as $search) {
             if (!empty($search)) {
                 $array[] = $search;
             }
