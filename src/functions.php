@@ -9,8 +9,8 @@ if (!function_exists('appBasePath')) {
     {
         $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
-        if (str_contains($basePath, 'public' . DIRECTORY_SEPARATOR)) {
-            $basePath = rtrim($basePath, 'public' . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if (str_contains($basePath, 'public')) {
+            $basePath = str_replace('public' . DIRECTORY_SEPARATOR, '', $basePath);
         }
 
         return $basePath;
