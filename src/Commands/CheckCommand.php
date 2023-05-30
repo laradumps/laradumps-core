@@ -21,15 +21,17 @@ use function Termwind\{render, renderUsing};
 )]
 class CheckCommand extends Command
 {
+    private string $defaultTextToSearch = 'ds,dsq,dsd,ds1,ds2,ds3,ds4,ds5';
+
     protected function configure(): void
     {
         $this
-            ->addOption('dirty', null, InputArgument::OPTIONAL)
-            ->addOption('dir', null, InputArgument::OPTIONAL)
-            ->addOption('ignore', null, InputArgument::OPTIONAL)
-            ->addOption('text', null, InputArgument::OPTIONAL)
-            ->addOption('ignore-files', null, InputArgument::OPTIONAL)
-            ->addArgument('stop-on-failure', InputArgument::OPTIONAL);
+            ->addOption('dirty', null, InputArgument::OPTIONAL, 'Search only files that are dirty in git')
+            ->addOption('dir', null, InputArgument::OPTIONAL, 'Directories that will be filtered separated by comma')
+            ->addOption('ignore', null, InputArgument::OPTIONAL, 'Directories to be ignored separated by comma')
+            ->addOption('text', null, InputArgument::OPTIONAL, 'Texts that will be searched separated by a comma')
+            ->addOption('ignore-files', null, InputArgument::OPTIONAL, 'Files that will be ignored separated by a comma')
+            ->addArgument('stop-on-failure', InputArgument::OPTIONAL, 'Stop the search if a match is found');
     }
 
     /**
@@ -37,12 +39,12 @@ class CheckCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $dirtyFiles = [];
+        renderUsing($output);
 
         $output->writeln('');
 
         if (empty($input->getOption('dir'))) {
-            $output->writeln('  👋️  <error>Whoops. Specify the folders you need to search in DS_CHECK_IN_DIR in the comma separated .env file</error>');
+            $output->writeln('  👋️  <error>Whoops. Specify the folders you need to search in --dir option in the comma separated .env file</error>');
             $output->writeln('');
 
             return Command::FAILURE;
@@ -50,42 +52,21 @@ class CheckCommand extends Command
 
         $output->writeln('    <info>LaraDumps is searching for words used in debugging in: ' . $input->getOption('dir') . '</info>');
 
+        $dirtyFiles = [];
+
         if (!empty($input->getOption('dirty'))) {
             $dirtyFiles = GitDirtyFiles::run();
 
             if (empty($dirtyFiles)) {
-                render(<<<HTML
-<div class="mx-1">
-    <div class="flex space-x-1">
-        <span class="flex-1 content-repeat-[─] text-gray"></span>
-    </div>
-    <div>
-        <span>
-            <div class="flex space-x-2 mx-1 mb-1">
-                 <span class="px-2 bg-green text-white uppercase font-bold">
-                      ✓ SUCCESS
-                 </span>
-            </div>
-        </span>
-    </div>
-</div>
-HTML);
+                $this->displaySuccess();
 
                 return Command::SUCCESS;
             }
         }
 
-        $ignoreLineWhenContainsText = $this->prepareTextToIgnore($input);
-
-        $textToSearch = $this->prepareTextToSearch($input);
-
-        renderUsing($output);
-
         $matches = [];
 
-        $finder = new Finder();
-
-        $finder->files()
+        $finder = (new Finder())->files()
             ->ignoreVCSIgnored(true)
             ->in($this->prepareDirectories($input));
 
@@ -111,8 +92,7 @@ HTML);
                 $contains = false;
                 $ignore   = false;
 
-                /** @var string[] $ignoreLineWhenContainsText */
-                foreach ($ignoreLineWhenContainsText as $text) {
+                foreach ($this->prepareTextToIgnore($input) as $text) {
                     if (strpos(strtolower($lineContent), strtolower($text))) {
                         $ignore = true;
 
@@ -120,8 +100,7 @@ HTML);
                     }
                 }
 
-                /** @var string[] $textToSearch */
-                foreach ($textToSearch as $search) {
+                foreach ($this->prepareTextToSearch($input) as $search) {
                     $search = ' ' . ltrim($search); // maintaining compatibility with V1.0.2;
 
                     if (strpos($lineContent, $search)) {
@@ -132,7 +111,7 @@ HTML);
                 }
 
                 if ($contains && !$ignore) {
-                    $matches[] = $this->saveContent($file, $lineContent, $line);
+                    $matches[] = $this->addMatchToDisplay($file, $lineContent, $line);
 
                     if ($input->getArgument('stop-on-failure')) {
                         break 2;
@@ -144,25 +123,7 @@ HTML);
         $output->writeln('');
 
         foreach ($matches as $iterator => $content) {
-            $output->writeln(
-                ' ' . ($iterator + 1)
-                . '<href=' . $content['link'] . '>  '
-                . $content['realPath']
-                . ':'
-                . $content['line']
-                . '</>'
-            );
-
-            $line    = $content['line'] - 2;
-            $content = $content['content'];
-
-            render(<<<HTML
-            <div class="space-x-1 mx-2 mb-1">
-                <code line="$line" start-line="$line">
-                    $content
-                </code>
-            </div>
-            HTML);
+            $this->displayCodeBlock($output, $iterator, $content);
         }
 
         $progressBar->finish();
@@ -170,54 +131,14 @@ HTML);
         $output->writeln('');
 
         if (($total = count($matches)) > 0) {
-            $totalFiles = count(array_unique(array_column($matches, 'realPath')));
-
-            $errorMessage = ($total === 1) ? 'error' : 'errors';
-            $fileMessage  = ($totalFiles === 1) ? 'file' : 'files';
-
-            $message = '[ERROR] Found ' . $total . ' ' . $errorMessage . ' / ' . $totalFiles . ' ' . $fileMessage;
-
-            render(
-                <<<HTML
-<div class="mx-1">
-    <div class="flex space-x-1">
-        <span class="flex-1 content-repeat-[─] text-gray"></span>
-    </div>
-    <div>
-        <span>
-            <div class="flex space-x-2 mx-1 mb-1">
-                 <span class="p-2 bg-red text-white">
-                 $message
-                 </span>
-            </div>
-        </span>
-    </div>
-</div>
-HTML
-            );
+            $this->displayErrorFound($total, $matches);
 
             return Command::FAILURE;
         }
 
         $output->writeln('');
 
-        render(<<<HTML
-            <div class="mx-1">
-                No ds() found.
-                <div class="flex space-x-1">
-                    <span class="flex-1 content-repeat-[─] text-gray"></span>
-                </div>
-                <div>
-                    <span>
-                        <div class="flex space-x-2 mx-1 mb-1">
-                            <span class="px-2 bg-green text-white uppercase font-bold">
-                                 ✓ SUCCESS
-                            </span>
-                        </div>
-                    </span>
-                </div>
-            </div>
-        HTML);
+        $this->displaySuccess();
 
         return Command::SUCCESS;
     }
@@ -252,13 +173,11 @@ HTML
     {
         $textToSearch = [];
 
-        $default = 'ds,dsq,dsd,ds1,ds2,ds3,ds4,ds5';
-
         $checkInFor = $input->getOption('text') ?? "";
 
         $values = explode(",", $checkInFor);
 
-        $mergedValues = array_unique(array_merge(explode(",", $default), $values));
+        $mergedValues = array_unique(array_merge(explode(",", $this->defaultTextToSearch), $values));
 
         foreach ($mergedValues as $search) {
             $search = trim($search);
@@ -290,7 +209,7 @@ HTML
         return $array;
     }
 
-    private function saveContent(\SplFileInfo $file, string $lineContent, int $line): array
+    private function addMatchToDisplay(\SplFileInfo $file, string $lineContent, int $line): array
     {
         /** @var array $fileContents */
         $fileContents = file($file->getRealPath());
@@ -310,5 +229,80 @@ HTML
             ]),
             'content' => $partialContent,
         ];
+    }
+
+    private function displaySuccess(): void
+    {
+        render(
+            <<<HTML
+<div class="mx-1">
+    No ds() found.
+    <div class="flex space-x-1">
+        <span class="flex-1 content-repeat-[─] text-gray"></span>
+    </div>
+    <div>
+        <span>
+            <div class="flex space-x-2 mx-1 mb-1">
+                 <span class="px-2 bg-green text-white uppercase font-bold">
+                      ✓ SUCCESS
+                 </span>
+            </div>
+        </span>
+    </div>
+</div>
+HTML
+        );
+    }
+
+    private function displayCodeBlock(OutputInterface $output, int $iterator, array $content): void
+    {
+        $output->writeln(
+            ' ' . ($iterator + 1)
+            . '<href=' . $content['link'] . '>  '
+            . $content['realPath']
+            . ':'
+            . $content['line']
+            . '</>'
+        );
+
+        $line    = $content['line'] - 2;
+        $content = $content['content'];
+
+        render(<<<HTML
+            <div class="space-x-1 mx-2 mb-1">
+                <code line="$line" start-line="$line">
+                    $content
+                </code>
+            </div>
+            HTML);
+    }
+
+    private function displayErrorFound(int $total, array $matches): void
+    {
+        $totalFiles = count(array_unique(array_column($matches, 'realPath')));
+
+        $errorMessage = ($total === 1) ? 'error' : 'errors';
+        $fileMessage  = ($totalFiles === 1) ? 'file' : 'files';
+
+        $message = '[ERROR] Found ' . $total . ' ' . $errorMessage . ' / ' . $totalFiles . ' ' . $fileMessage;
+
+        render(
+            <<<HTML
+<div class="mx-1">
+    <div class="flex space-x-1">
+        <span class="flex-1 content-repeat-[─] text-gray"></span>
+    </div>
+    <div>
+        <span>
+            <div class="flex space-x-2 mx-1 mb-1">
+                 <span class="p-2 bg-red text-white">
+                 $message
+                 </span>
+            </div>
+        </span>
+    </div>
+</div>
+HTML
+        );
     }
 }
