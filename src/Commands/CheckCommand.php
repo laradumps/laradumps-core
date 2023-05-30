@@ -23,6 +23,8 @@ class CheckCommand extends Command
 {
     private string $defaultTextToSearch = 'ds,dsq,dsd,ds1,ds2,ds3,ds4,ds5';
 
+    private string $defaultTextToIgnore = '@dsAutoClearOnPageReload';
+
     protected function configure(): void
     {
         $this
@@ -44,7 +46,7 @@ class CheckCommand extends Command
         $output->writeln('');
 
         if (empty($input->getOption('dir'))) {
-            $output->writeln('  👋️  <error>Whoops. Specify the folders you need to search in --dir option in the comma separated .env file</error>');
+            $output->writeln('  👋️  <error>Whoops. Specify the folders you need to search in --dir option in the comma separated</error>');
             $output->writeln('');
 
             return Command::FAILURE;
@@ -67,7 +69,9 @@ class CheckCommand extends Command
         $matches = [];
 
         $finder = (new Finder())->files()
-            ->ignoreVCSIgnored(true)
+            ->ignoreVCS(true)
+            ->exclude('node_modules')
+            ->name('*.php')
             ->in($this->prepareDirectories($input));
 
         $progressBar = new ProgressBar($output, count($dirtyFiles) ?: $finder->count());
@@ -101,9 +105,10 @@ class CheckCommand extends Command
                 }
 
                 foreach ($this->prepareTextToSearch($input) as $search) {
-                    $search = ' ' . ltrim($search); // maintaining compatibility with V1.0.2;
+                    $search = ' ' . ltrim($search);
 
                     if (strpos($lineContent, $search)) {
+                        echo 'search: ' . $search;
                         $contains = true;
 
                         break;
@@ -200,7 +205,13 @@ class CheckCommand extends Command
     {
         $array = [];
 
-        foreach (explode(",", $input->getOption('ignore') ?? "") as $search) {
+        $ignore = $input->getOption('ignore') ?? "";
+
+        $values = explode(",", $ignore);
+
+        $mergedValues = array_unique(array_merge(explode(",", $this->defaultTextToIgnore), $values));
+
+        foreach ($mergedValues as $search) {
             if (!empty($search)) {
                 $array[] = $search;
             }
@@ -281,10 +292,10 @@ HTML
     {
         $totalFiles = count(array_unique(array_column($matches, 'realPath')));
 
-        $errorMessage = ($total === 1) ? 'error' : 'errors';
-        $fileMessage  = ($totalFiles === 1) ? 'file' : 'files';
+        $totalErrorMessage = ($total === 1) ? 'error' : 'errors';
+        $totalFileMessage  = ($totalFiles === 1) ? 'file' : 'files';
 
-        $message = '[ERROR] Found ' . $total . ' ' . $errorMessage . ' / ' . $totalFiles . ' ' . $fileMessage;
+        $message = '[ERROR] Found ' . $total . ' ' . $totalErrorMessage . ' / ' . $totalFiles . ' ' . $totalFileMessage;
 
         render(
             <<<HTML
