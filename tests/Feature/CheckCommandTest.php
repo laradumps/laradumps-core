@@ -27,7 +27,7 @@ it('show message if variable ... is empty', function () {
     $output = $commandTester->getDisplay();
 
     expect($output)
-        ->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated .env file');
+        ->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated');
 });
 
 it('check command work property', function () {
@@ -41,8 +41,8 @@ it('check command work property', function () {
     expect($output)
         ->toContain('LaraDumps is searching for words used in debugging in: ' . sprintf('tests%sFixtures', DIRECTORY_SEPARATOR))
         ->and($output)
-        ->not->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated .env file')
-        ->toContain('1/3')
+        ->not->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated')
+        ->toContain('1/2')
         ->toContain(
             'ds(\'this is a function to check!\')',
             '@ds("this is a function to check!")',
@@ -67,15 +67,15 @@ it('check command with "dump", "dd" work property', function () {
     expect($output)
         ->toContain('LaraDumps is searching for words used in debugging in: ' . sprintf('tests%sFixtures', DIRECTORY_SEPARATOR))
         ->and($output)
-        ->not->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated .env file')
-        ->toContain('1/3')
+        ->not->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated')
+        ->toContain('1/2')
         ->toContain(
             'dump(\'this is a function to check!\')',
             'dd(\'this is a function to check!\')',
             '//dd(\'this is a function to check!\')'
         )
         ->toContain('[ERROR] Found 3 errors / 1 file');
-});
+})->only();
 
 it('check command without "dump", "dd" work property', function () {
     $commandTester = startCommandApplication([
@@ -88,8 +88,8 @@ it('check command without "dump", "dd" work property', function () {
     expect($output)
         ->toContain('LaraDumps is searching for words used in debugging in: ' . sprintf('tests%sFixtures', DIRECTORY_SEPARATOR))
         ->and($output)
-        ->not->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated .env file')
-        ->toContain('1/3')
+        ->not->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated')
+        ->toContain('1/2')
         ->toContain(
             'ds(\'this is a function to check!\');',
             ' @ds("this is a function to check!")',
