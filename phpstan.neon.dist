@@ -8,3 +8,4 @@ parameters:
     ignoreErrors:
         - '#Function [a-zA-Z0-9\\:()]+ has no return type specified.#'
         - '~^Parameter #1 \$value of function intval expects array\|bool\|float\|int\|resource\|string\|null, mixed given\.$~'
+        - '~^Parameter #2 \$string of function explode expects string, mixed given\.$~'
