@@ -25,7 +25,7 @@ final class MakeFileHandler
         $filepath = strstr(strval($trace['file']), $filename, true);
 
         if (!empty($forceProjectPath)) {
-            $filepath = str_replace(strval($filepath), $forceProjectPath, strval($filepath));
+            $filepath = str_replace(strval(appBasePath()), $forceProjectPath, strval($filepath));
         }
 
         $filepath = self::endsWithSeparator(strval($filepath));
