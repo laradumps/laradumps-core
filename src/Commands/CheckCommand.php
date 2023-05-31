@@ -62,7 +62,7 @@ class CheckCommand extends Command
             $dirtyFiles = GitDirtyFiles::run();
 
             if (empty($dirtyFiles)) {
-                $this->displaySuccess();
+                $this->displaySuccess('0');
 
                 return Command::SUCCESS;
             }
@@ -246,7 +246,7 @@ class CheckCommand extends Command
         ];
     }
 
-    private function displaySuccess(int $duration): void
+    private function displaySuccess(string $duration): void
     {
         render(
             <<<HTML
