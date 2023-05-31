@@ -75,7 +75,7 @@ it('check command with "dump", "dd" work property', function () {
             '//dd(\'this is a function to check!\')'
         )
         ->toContain('[ERROR] Found 3 errors / 1 file');
-})->only();
+});
 
 it('check command without "dump", "dd" work property', function () {
     $commandTester = startCommandApplication([

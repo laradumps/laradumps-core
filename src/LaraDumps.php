@@ -290,7 +290,7 @@ class LaraDumps
         }
 
         /** @phpstan-ignore-next-line  */
-        $installationPayloadInstance = new $installationPayload($_ENV['APP_NAME']);
+        $installationPayloadInstance = new $installationPayload($_ENV['APP_NAME'] ?? "");
         /** @phpstan-ignore-next-line  */
         $this->send($installationPayloadInstance);
 
