@@ -41,6 +41,8 @@ class CheckCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $startTime = microtime(true);
+
         renderUsing($output);
 
         $output->writeln('');
@@ -133,6 +135,8 @@ class CheckCommand extends Command
 
         $progressBar->finish();
 
+        $duration = number_format((microtime(true) - $startTime) * 1000, 2);
+
         $output->writeln('');
 
         if (($total = count($matches)) > 0) {
@@ -143,7 +147,7 @@ class CheckCommand extends Command
 
         $output->writeln('');
 
-        $this->displaySuccess();
+        $this->displaySuccess($duration);
 
         return Command::SUCCESS;
     }
@@ -242,12 +246,12 @@ class CheckCommand extends Command
         ];
     }
 
-    private function displaySuccess(): void
+    private function displaySuccess(int $duration): void
     {
         render(
             <<<HTML
 <div class="mx-1">
-    No ds() found.
+    No ds() found in $duration ms
     <div class="flex space-x-1">
         <span class="flex-1 content-repeat-[─] text-gray"></span>
     </div>
