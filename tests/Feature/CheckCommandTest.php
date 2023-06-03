@@ -52,7 +52,7 @@ it('check command work property', function () {
             'dd(\'this is a function to check!\')',
             '//ds(\'this is a function to check!\')'
         )
-        ->toContain('[ERROR] Found 2 errors / 1 file');
+        ->toContain('ERROR - Found 2 errors / 1 file');
 });
 
 it('check command with "dump", "dd" work property', function () {
@@ -74,7 +74,7 @@ it('check command with "dump", "dd" work property', function () {
             'dd(\'this is a function to check!\')',
             '//dd(\'this is a function to check!\')'
         )
-        ->toContain('[ERROR] Found 3 errors / 1 file');
+        ->toContain('ERROR - Found 3 errors / 1 file');
 });
 
 it('check command without "dump", "dd" work property', function () {
@@ -94,5 +94,5 @@ it('check command without "dump", "dd" work property', function () {
             'ds(\'this is a function to check!\');',
             ' @ds("this is a function to check!")',
         )
-        ->toContain('[ERROR] Found 2 errors / 1 file');
+        ->toContain('ERROR - Found 2 errors / 1 file');
 });

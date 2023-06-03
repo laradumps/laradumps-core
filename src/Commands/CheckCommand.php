@@ -48,13 +48,13 @@ class CheckCommand extends Command
         $output->writeln('');
 
         if (empty($input->getOption('dir'))) {
-            $output->writeln('  👋️  <error>Whoops. Specify the folders you need to search in --dir option in the comma separated</error>');
+            $output->writeln(' 👋️ <error>Whoops. Specify the folders you need to search in --dir option in the comma separated</error>');
             $output->writeln('');
 
             return Command::FAILURE;
         }
 
-        $output->writeln('    <info>LaraDumps is searching for words used in debugging in: ' . $input->getOption('dir') . '</info>');
+        $output->writeln(' 🔍 <info>LaraDumps is searching for words used in debugging in: ' . $input->getOption('dir') . '</info>');
 
         $dirtyFiles = [];
 
@@ -110,7 +110,6 @@ class CheckCommand extends Command
                     $search = ' ' . ltrim($search);
 
                     if (strpos($lineContent, $search)) {
-                        echo 'search: ' . $search;
                         $contains = true;
 
                         break;
@@ -135,21 +134,40 @@ class CheckCommand extends Command
 
         $progressBar->finish();
 
-        $duration = number_format((microtime(true) - $startTime) * 1000, 2);
-
-        $output->writeln('');
+        $duration = $this->getDuration($startTime);
 
         if (($total = count($matches)) > 0) {
-            $this->displayErrorFound($total, $matches);
+            $this->displayErrorFound($total, $matches, $duration);
 
             return Command::FAILURE;
         }
 
-        $output->writeln('');
-
         $this->displaySuccess($duration);
 
         return Command::SUCCESS;
+    }
+
+    private function getDuration(float $startTime): string
+    {
+        $duration = ((microtime(true) - $startTime) * 1000);
+
+        if ($duration > 60000) {
+            $mins     = floor($duration / 60000);
+            $secs     = round((fmod($duration, 60000) / 1000), 2);
+            $duration = $mins . ' mins';
+
+            if ($secs !== 0) {
+                $duration .= ", $secs secs";
+            }
+
+            return $duration;
+        }
+
+        if ($duration > 1000) {
+            return round(($duration / 1000), 2) . ' secs';
+        }
+
+        return round($duration) . 'ms';
     }
 
     private function prepareDirectories(InputInterface $input): array
@@ -246,34 +264,13 @@ class CheckCommand extends Command
         ];
     }
 
-    private function displaySuccess(string $duration): void
-    {
-        render(
-            <<<HTML
-<div class="mx-1">
-    No ds() found in $duration ms
-    <div class="flex space-x-1">
-        <span class="flex-1 content-repeat-[─] text-gray"></span>
-    </div>
-    <div>
-        <span>
-            <div class="flex space-x-2 mx-1 mb-1">
-                 <span class="px-2 bg-green text-white uppercase font-bold">
-                      ✓ SUCCESS
-                 </span>
-            </div>
-        </span>
-    </div>
-</div>
-HTML
-        );
-    }
-
     private function displayCodeBlock(OutputInterface $output, int $iterator, array $content): void
     {
+        $output->writeln('');
+
         $output->writeln(
             ' ' . ($iterator + 1)
-            . '<href=' . $content['link'] . '>  '
+            . ' <href=' . $content['link'] . '>'
             . $content['realPath']
             . ':'
             . $content['line']
@@ -292,30 +289,52 @@ HTML
             HTML);
     }
 
-    private function displayErrorFound(int $total, array $matches): void
+    private function displaySuccess(string $duration): void
+    {
+        render(
+            <<<HTML
+<div>
+    <div class="flex">
+        <span class="flex-1 content-repeat-[-] text-gray"></span>
+    </div>
+    <div>
+        <div class="text-green ml-2">
+          ✅  <span class="mx-1"><span class="font-bold">SUCCESS</span> - No results found</span>
+        </div>
+        <div class=" ml-2 mt-0.5">
+           🕗 Duration: $duration
+        </div>
+    </div>
+    <div></div>
+</div>
+HTML
+        );
+    }
+
+    private function displayErrorFound(int $total, array $matches, string $duration): void
     {
         $totalFiles = count(array_unique(array_column($matches, 'realPath')));
 
         $totalErrorMessage = ($total === 1) ? 'error' : 'errors';
         $totalFileMessage  = ($totalFiles === 1) ? 'file' : 'files';
 
-        $message = '[ERROR] Found ' . $total . ' ' . $totalErrorMessage . ' / ' . $totalFiles . ' ' . $totalFileMessage;
+        $message = 'Found ' . $total . ' ' . $totalErrorMessage . ' / ' . $totalFiles . ' ' . $totalFileMessage;
 
         render(
             <<<HTML
-<div class="mx-1">
-    <div class="flex space-x-1">
-        <span class="flex-1 content-repeat-[─] text-gray"></span>
+<div>
+    <div class="flex">
+        <span class="flex-1 content-repeat-[-] text-gray"></span>
     </div>
     <div>
-        <span>
-            <div class="flex space-x-2 mx-1 mb-1">
-                 <span class="p-2 bg-red text-white">
-                 $message
-                 </span>
-            </div>
-        </span>
+        <div class="text-red ml-2">
+          ❌  <span class="mx-1"><span class="font-bold">ERROR</span> - $message</span>
+        </div>
+        <div class=" ml-2 mt-0.5">
+           🕗 Duration: $duration
+        </div>
     </div>
+    <div></div>
 </div>
 HTML
         );
