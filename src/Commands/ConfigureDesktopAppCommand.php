@@ -2,7 +2,7 @@
 
 namespace LaraDumps\LaraDumpsCore\Commands;
 
-use LaraDumps\LaraDumps\Actions\Config;
+use LaraDumps\LaraDumpsCore\Actions\Config;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
