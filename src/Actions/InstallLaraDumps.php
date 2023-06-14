@@ -28,7 +28,7 @@ class InstallLaraDumps extends Command
 
             /** @var Payload $installationPayload */
             $payload = new $installationPayload();
-            $payload->notificationId(Uuid::uuid4()->toString());
+            $payload->setNotificationId(Uuid::uuid4()->toString());
 
             $result = SendPayload::baseUrl($host)->handle($payload->toArray());
 

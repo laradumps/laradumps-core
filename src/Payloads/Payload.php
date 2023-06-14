@@ -10,6 +10,8 @@ abstract class Payload
 {
     use Traceable;
 
+    private bool $dispatched = false;
+
     private string $notificationId;
 
     private ?string $dumpId = null;
@@ -18,12 +20,22 @@ abstract class Payload
 
     abstract public function type(): string;
 
-    public function dumpId(string $id): void
+    public function setDispatch(bool $dispatched): void
+    {
+        $this->dispatched = $dispatched;
+    }
+
+    public function getDispatch(): bool
+    {
+        return $this->dispatched;
+    }
+
+    public function setDumpId(string $id): void
     {
         $this->dumpId = $id;
     }
 
-    public function notificationId(string $notificationId): void
+    public function setNotificationId(string $notificationId): void
     {
         $this->notificationId = $notificationId;
     }

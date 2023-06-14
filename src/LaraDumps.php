@@ -28,6 +28,8 @@ class LaraDumps
 {
     use Colors;
 
+    private bool $dispatched = false;
+
     public function __construct(
         public string $notificationId = '',
         private array $trace = [],
@@ -77,22 +79,23 @@ class LaraDumps
         }
     }
 
-    public function send(array|Payload $payload): array|Payload
+    public function send(Payload $payload): Payload
     {
-        if (!$payload instanceof Payload) {
-            return $payload;
-        }
-
         if (!empty($this->trace)) {
             $payload->setTrace($this->trace);
         }
 
-        $payload->notificationId($this->notificationId);
-
-        $payload = $payload->toArray();
+        $payload->setNotificationId($this->notificationId);
 
         $sendPayload = new SendPayload();
-        $sendPayload->handle($payload);
+
+        $response = $sendPayload->handle(
+            $payload->toArray()
+        );
+
+        if ($response) {
+            $payload->setDispatch(true);
+        }
 
         return $payload;
     }
@@ -102,7 +105,7 @@ class LaraDumps
         [$payload, $id] = $this->beforeWrite($args)();
 
         $payload->autoInvokeApp($autoInvokeApp);
-        $payload->dumpId($id);
+        $payload->setDumpId($id);
         $payload->setTrace($trace);
 
         $this->send($payload);
@@ -281,6 +284,11 @@ class LaraDumps
         return $this;
     }
 
+    public function getDispatch(): bool
+    {
+        return $this->dispatched;
+    }
+
     public function configure(): static
     {
         if (class_exists(\LaraDumps\LaraDumps\Payloads\InstallationPayload::class)) {
@@ -291,8 +299,10 @@ class LaraDumps
 
         /** @phpstan-ignore-next-line  */
         $installationPayloadInstance = new $installationPayload($_ENV['APP_NAME'] ?? "");
+
         /** @phpstan-ignore-next-line  */
-        $this->send($installationPayloadInstance);
+        $dispatched       = $this->send($installationPayloadInstance);
+        $this->dispatched = $dispatched->getDispatch();
 
         return $this;
     }
