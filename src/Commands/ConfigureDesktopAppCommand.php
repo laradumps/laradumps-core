@@ -26,8 +26,6 @@ class ConfigureDesktopAppCommand extends Command
             $output->writeln(' 💡 In your terminal in root (outside the container). In the root of your project run: pwd');
             $output->writeln(' 💡 In app: "<info>PHP Project Path: (when docker)</info>" paste pwd value');
             $output->writeln('');
-            $output->writeln(' 💡 In app: "<info>PHP Project Path: (when docker)</info>" paste pwd value');
-            $output->writeln('');
             $output->writeln('  <info>  Finish configuring in the app</info>');
         }
 
