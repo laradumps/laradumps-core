@@ -12,7 +12,7 @@
       <img alt="Latest Version" src="https://img.shields.io/packagist/v/laradumps/laradumps-core">
     </a>
     <a href="https://github.com/laradumps/laradumps-core/actions">
-        <img alt="Tests" src="https://github.com/laradumps/laradumps/workflows/LaraDumps%20Tests/badge.svg" />
+        <img alt="Tests" src="https://github.com/laradumps/laradumps-core/workflows/LaraDumpsCore%20Tests/badge.svg" />
     </a>
     <a href="https://packagist.org/packages/laradumps-core/laradumps">
       <img alt="License" src="https://img.shields.io/github/license/laradumps/laradumps-core">
