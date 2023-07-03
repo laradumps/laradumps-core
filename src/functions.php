@@ -20,7 +20,7 @@ if (!function_exists('appBasePath')) {
 if (!function_exists('ds')) {
     function ds(mixed ...$args)
     {
-        $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)[0];
+        $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS | DEBUG_BACKTRACE_PROVIDE_OBJECT)[0];
 
         $sendRequest = function ($args, LaraDumps $laradumps) use ($stack) {
             if ($args) {

@@ -59,7 +59,7 @@ class LaraDumps
             [$pre, $id] = Dumper::dump($args);
 
             return [
-                new DumpPayload($pre, $args),
+                new DumpPayload($pre, $args, variableType: gettype($args)),
                 $id,
             ];
         };
