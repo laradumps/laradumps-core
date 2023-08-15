@@ -41,7 +41,7 @@ final class SendPayload
             CURLOPT_POSTFIELDS        => json_encode($payload),
             CURLOPT_URL               => $this->appUrl,
             CURLOPT_TIMEOUT           => 1,
-            CURLOPT_CONNECTTIMEOUT_MS => 10,
+            CURLOPT_CONNECTTIMEOUT_MS => 100,
         ]);
 
         $exec = curl_exec($curlRequest);
