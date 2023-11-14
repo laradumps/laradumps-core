@@ -58,7 +58,16 @@ if (!function_exists('phpinfo')) {
 if (!function_exists('dsd')) {
     function dsd(mixed ...$args): void
     {
-        ds($args)->die();
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+
+        $notificationId = Uuid::uuid4()->toString();
+        $dump           = new LaraDumps($notificationId, trace: $trace);
+
+        foreach ($args as $arg) {
+            $dump->write($arg);
+        }
+
+        die();
     }
 }
 
