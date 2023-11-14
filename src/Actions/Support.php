@@ -4,20 +4,13 @@ namespace LaraDumps\LaraDumpsCore\Actions;
 
 class Support
 {
-    // extracted from Illuminate\Support\Str
     public static function isJson(mixed $value): bool
     {
         if (!is_string($value)) {
             return false;
         }
 
-        try {
-            json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\Exception) {
-            return false;
-        }
-
-        return true;
+        return is_array(json_decode($value, true));
     }
 
     public static function cut(string $str, string $start, string $end): string
