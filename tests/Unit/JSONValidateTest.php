@@ -82,36 +82,36 @@ it('detects valid JSON with escaped characters', function () {
 
 it('detects valid JSON with nested arrays', function () {
     $jsonString = '{"numbers": [1, 2, 3], "colors": ["red", "green", "blue"]}';
-    $validate = Support::isJson($jsonString);
+    $validate   = Support::isJson($jsonString);
     expect($validate)->toBe(true);
 });
 
 it('detects valid JSON with boolean values', function () {
     $jsonString = '{"enabled": true, "disabled": false}';
-    $validate = Support::isJson($jsonString);
+    $validate   = Support::isJson($jsonString);
     expect($validate)->toBe(true);
 });
 
 it('detects valid JSON with null values', function () {
     $jsonString = '{"name": "John", "middleName": null, "lastName": "Doe"}';
-    $validate = Support::isJson($jsonString);
+    $validate   = Support::isJson($jsonString);
     expect($validate)->toBe(true);
 });
 
 it('detects valid JSON with complex object structure', function () {
     $jsonString = '{"user": {"id": 1, "name": "John", "address": {"city": "New York", "zip": "10001"}}}';
-    $validate = Support::isJson($jsonString);
+    $validate   = Support::isJson($jsonString);
     expect($validate)->toBe(true);
 });
 
 it('detects valid JSON with arrays of mixed types', function () {
     $jsonString = '{"mixedArray": [1, "two", {"key": "value"}, [false, true]]}';
-    $validate = Support::isJson($jsonString);
+    $validate   = Support::isJson($jsonString);
     expect($validate)->toBe(true);
 });
 
 it('detects invalid JSON with unescaped special characters', function () {
     $jsonString = '{"message": "This is an unescaped "quoted" string."}';
-    $validate = Support::isJson($jsonString);
+    $validate   = Support::isJson($jsonString);
     expect($validate)->toBe(false);
 });
