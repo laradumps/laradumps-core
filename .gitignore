@@ -3,3 +3,4 @@
 .env
 .env.example
 .phpunit.result.cache
+composer.lock
