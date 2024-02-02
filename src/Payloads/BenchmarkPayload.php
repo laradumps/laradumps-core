@@ -2,7 +2,6 @@
 
 namespace LaraDumps\LaraDumpsCore\Payloads;
 
-use Carbon\Carbon;
 use LaraDumps\LaraDumpsCore\Support\Dumper;
 
 class BenchmarkPayload extends Payload
@@ -31,17 +30,22 @@ class BenchmarkPayload extends Payload
         }
 
         foreach ($closures as $label => $closure) {
-            $startsAt = Carbon::now();
+            $startsAt = microtime(true);
             /** @var callable $result */
             $result = $closure();
-            $endsAt = Carbon::now();
 
-            $totalTime = $endsAt->diffInMilliseconds($startsAt);
+            $endsAt    = microtime(true);
+            $totalTime = round(($endsAt - $startsAt) * 1000);
             $label     = is_int($label) ? 'Closure ' . $label : $label;
 
+            /** @var \DateTime $startDateTime */
+            $startDateTime = \DateTime::createFromFormat('U.u', sprintf('%.6f', $startsAt));
+            /** @var \DateTime $endDateTime */
+            $endDateTime = \DateTime::createFromFormat('U.u', sprintf('%.6f', $endsAt));
+
             $results[$label] = [
-                'Start Time' => $startsAt->toDateTimeString(),
-                'End Time'   => $endsAt->toDateTimeString(),
+                'Start Time' => $startDateTime->format('Y-m-d H:i:s'),
+                'End Time'   => $endDateTime->format('Y-m-d H:i:s'),
                 'Total Time' => $totalTime . ' ms',
                 'Result'     => $result,
             ];
@@ -56,7 +60,7 @@ class BenchmarkPayload extends Payload
 
         return [
             'label'  => 'Benchmark',
-            'values' => array_map(fn ($result, $index) => Dumper::dump($result), $results), /** @phpstan-ignore-line  */
+            'values' => array_map(fn ($result) => Dumper::dump($result), $results),
         ];
     }
 }

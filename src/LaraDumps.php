@@ -280,6 +280,7 @@ class LaraDumps
     {
         $benchmarkPayload = new BenchmarkPayload($args);
         $this->send($benchmarkPayload);
+        $this->label('Benchmark');
 
         return $this;
     }
