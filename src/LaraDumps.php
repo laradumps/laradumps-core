@@ -56,6 +56,10 @@ class LaraDumps
                 ];
             }
 
+            if ($args === "") {
+                $args = "&nbsp; ";
+            }
+
             [$pre, $id] = Dumper::dump($args);
 
             return [
