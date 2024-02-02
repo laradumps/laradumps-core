@@ -13,6 +13,10 @@ class Dumper
     {
         $id = Uuid::uuid4()->toString();
 
+        if ($arguments === "") {
+            $arguments = "&nbsp; ";
+        }
+
         if (is_null($arguments)) {
             return [null, $id];
         }
