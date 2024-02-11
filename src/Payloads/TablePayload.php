@@ -7,7 +7,7 @@ use LaraDumps\LaraDumpsCore\Actions\Table;
 class TablePayload extends Payload
 {
     public function __construct(
-        private mixed $data = [],
+        private iterable|object $data = [],
         private string $name = '',
     ) {
         if (empty($this->name)) {
@@ -22,6 +22,6 @@ class TablePayload extends Payload
 
     public function content(): array
     {
-        return (new Table($this->data, $this->name))->make();
+        return Table::make($this->data, $this->name);
     }
 }

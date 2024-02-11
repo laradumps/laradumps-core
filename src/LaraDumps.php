@@ -236,7 +236,7 @@ class LaraDumps
     /**
      * Send Table
      */
-    public function table(mixed $data = [], string $name = ''): LaraDumps
+    public function table(iterable|object $data = [], string $name = ''): LaraDumps
     {
         $payload = new TablePayload($data, $name);
         $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);

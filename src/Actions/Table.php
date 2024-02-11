@@ -4,29 +4,19 @@ namespace LaraDumps\LaraDumpsCore\Actions;
 
 class Table
 {
-    public function __construct(
-        private mixed $data = [],
-        private string $name = '',
-    ) {
-    }
-
-    public function make(): array
+    public static function make(iterable|object $data, string $name = ''): array
     {
         $values  = [];
         $columns = [];
-        $data    = $this->data;
 
-        if (class_exists('Illuminate\Support\Collection')) {
-            /** @var object|string $data */
-            $data = $this->data;
-
-            if (method_exists($data, 'toArray')) {
-                /** @phpstan-ignore-next-line */
-                $data = $data->toArray();
-            }
+        if (class_exists('Illuminate\Support\Collection') && $data instanceof \Illuminate\Support\Collection) {
+            $data = $data->toArray();
         }
 
-        /** @var array $data */
+        if (is_object($data) && method_exists($data, 'toArray')) {
+            $data = $data->toArray();
+        }
+
         foreach ($data as $row) {
             foreach ($row as $key => $item) {
                 if (!in_array($key, $columns)) {
@@ -47,7 +37,7 @@ class Table
             'fields' => $columns,
             'values' => $values,
             'header' => $columns,
-            'label'  => $this->name,
+            'label'  => $name,
         ];
     }
 }
