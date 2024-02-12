@@ -36,8 +36,9 @@ PHP 8.0+
 
 #### Usage
 
-1. Download the 🖥️ [LaraDumps](https://github.com/laradumps/app) 2.0.0-alpha Desktop App here: [LaraDumps Desktop App](https://laradumps.dev/get-started/installation.html#desktop-app)
-2. Install LaraDumps Core in your PHP project, run:
+1. Download the 🖥️ **LaraDumps Desktop App** from [laradumps.dev](https://laradumps.dev).
+   
+2. Install LaraDumps Core in your PHP project, run the command:
 
 ```shell
  composer require laradumps/laradumps-core --dev
@@ -48,15 +49,16 @@ PHP 8.0+
 ```shell
 vendor/bin/laradumps configure
  ```
-
-### Example
+4. Add a `ds()` function somewhere in your code.
 
 Here's an example:
 
 ```php
-// File: routes/web.php
+// File: index.php
 
 <?php 
+
+//... some PHP code ...
 
 ds('Hello from LaraDumps!');
 ```
