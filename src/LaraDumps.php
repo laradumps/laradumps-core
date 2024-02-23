@@ -23,6 +23,7 @@ use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
     ValidateStringPayload};
 use LaraDumps\LaraDumpsCore\Support\Dumper;
 use Ramsey\Uuid\Uuid;
+use Spatie\Backtrace\Frame;
 
 class LaraDumps
 {
@@ -31,8 +32,7 @@ class LaraDumps
     private bool $dispatched = false;
 
     public function __construct(
-        public string $notificationId = '',
-        private array $trace = [],
+        private string $notificationId = '',
     ) {
         if (!boolval(getenv('DS_RUNNING_IN_TESTS'))) {
             $this->checkForEnvironment();
@@ -81,10 +81,6 @@ class LaraDumps
 
     public function send(Payload $payload): Payload
     {
-        if (!empty($this->trace)) {
-            $payload->setTrace($this->trace);
-        }
-
         $payload->setNotificationId($this->notificationId);
 
         $sendPayload = new SendPayload();
@@ -100,13 +96,23 @@ class LaraDumps
         return $payload;
     }
 
-    public function write(mixed $args = null, ?bool $autoInvokeApp = null, array $trace = []): self
+    public function write(mixed $args = null, ?bool $autoInvokeApp = null, array|\Spatie\Backtrace\Frame $frame = []): self
     {
+        /** @var Payload $payload */
         [$payload, $id] = $this->beforeWrite($args)();
 
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->setDumpId($id);
-        $payload->setTrace($trace);
+
+        $payload->setFrame(
+            is_array($frame) ? new Frame(
+                file: $frame['file'],
+                lineNumber: $frame['line'],
+                arguments: null,
+                method: $frame['function'] ?? null,
+                class: $frame['class'] ?? null
+            ) : $frame
+        );
 
         $this->send($payload);
 
@@ -153,7 +159,7 @@ class LaraDumps
     public function label(string $label): LaraDumps
     {
         $payload = new LabelPayload($label);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -194,7 +200,7 @@ class LaraDumps
     public function isJson(): LaraDumps
     {
         $payload = new ValidJsonPayload();
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -213,7 +219,7 @@ class LaraDumps
         $payload->setContent($content)
             ->setCaseSensitive($caseSensitive)
             ->setWholeWord($wholeWord)
-            ->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+            ->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -226,7 +232,7 @@ class LaraDumps
     public function phpinfo(): LaraDumps
     {
         $payload = new PhpInfoPayload();
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -239,7 +245,7 @@ class LaraDumps
     public function table(iterable|object $data = [], string $name = ''): LaraDumps
     {
         $payload = new TablePayload($data, $name);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -254,7 +260,7 @@ class LaraDumps
     public function time(string $reference): void
     {
         $payload = new TimeTrackPayload($reference);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
         $this->label($reference);
@@ -268,7 +274,7 @@ class LaraDumps
     public function stopTime(string $reference): void
     {
         $payload = new TimeTrackPayload($reference, true);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
     }

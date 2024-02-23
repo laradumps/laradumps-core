@@ -2,59 +2,37 @@
 
 namespace LaraDumps\LaraDumpsCore\Concerns;
 
+use Spatie\Backtrace\{Backtrace, Frame};
+
 trait Traceable
 {
-    public array $trace = [];
-
-    protected array $backtraceExcludePaths = [
+    private array $backtraceExcludePaths = [
         '/vendor/laravel/framework/src/Illuminate',
-        '/vendor/barryvdh',
-        '/vendor/symfony',
         '/artisan',
         '/vendor/livewire',
         '/packages/laradumps',
         '/packages/laradumps-core',
-        '/vendor/laradumps',
-        '/vendor/laradumps-core',
+        '/laradumps/laradumps/',
+        '/laradumps/laradumps-core/',
     ];
 
-    public function setTrace(array $trace): array
+    public function parseFrame(Backtrace $backtrace)
     {
-        return $this->trace = $trace;
-    }
+        $frames = collect($backtrace->frames())
+            ->where('applicationFrame', true)
+            ->filter(function ($frame) {
+                $normalizedPath = str_replace('\\', '/', $frame->file);
 
-    protected function findSource(): array
-    {
-        $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 100);
+                foreach ($this->backtraceExcludePaths as $excludedPath) {
+                    if (str_contains($normalizedPath, $excludedPath)) {
+                        return false;
+                    }
+                }
 
-        $sources = [];
-
-        foreach ($stack as $trace) {
-            $sources[] = $this->parseTrace($trace);
-        }
-
-        return array_filter($sources);
-    }
-
-    protected function parseTrace(array $trace): array
-    {
-        if (isset($trace['class']) && isset($trace['file'])) {
-            return !$this->fileIsInExcludedPath($trace['file']) ? $trace : [];
-        }
-
-        return [];
-    }
-
-    protected function fileIsInExcludedPath(string $file): bool
-    {
-        $normalizedPath = str_replace('\\', '/', $file);
-
-        foreach ($this->backtraceExcludePaths as $excludedPath) {
-            if (str_contains($normalizedPath, $excludedPath)) {
                 return true;
-            }
-        }
+            })
+            ->toArray();
 
-        return false;
+        return $frames[array_key_first($frames)] ?? [];
     }
 }
