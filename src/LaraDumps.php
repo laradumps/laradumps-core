@@ -95,7 +95,10 @@ class LaraDumps
             $backtrace = Backtrace::create();
             $backtrace = $backtrace->applicationPath(appBasePath());
             $frame     = $this->parseFrame($backtrace);
-            $payload->setFrame($frame);
+
+            if (!empty($frame)) {
+                $payload->setFrame($frame);
+            }
         }
 
         $payload->setNotificationId($this->notificationId);

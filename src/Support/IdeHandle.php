@@ -44,6 +44,10 @@ class IdeHandle
         $className = explode('/', $path);
         $className = end($className);
 
+        if ($fileHandle === 'DS_FILE_HANDLER' || $fileHandle === '') {
+            $fileHandle = 'phpstorm://open?file={filepath}&line={line}';
+        }
+
         return [
             'handler'    => $fileHandle,
             'path'       => $path,
