@@ -34,6 +34,10 @@ final class MakeFileHandler
 
         $filepath = self::endsWithSeparator(strval($filepath));
 
+        if ($keyHandler === false || empty($keyHandler)) {
+            $keyHandler = 'phpstorm://open?file={filepath}&line={line}';
+        }
+
         $keyHandler = str_replace('{filepath}', $filepath . $filename, $keyHandler);
 
         /** @phpstan-ignore-next-line  */
