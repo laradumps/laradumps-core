@@ -4,7 +4,7 @@ use LaraDumps\LaraDumpsCore\Actions\MakeFileHandler;
 
 it('returns empty string when there is no .env keys ', function () {
     fixtureEnv('ds_env', ['DS_FILE_HANDLER' => null]);
-    expect(MakeFileHandler::handle(['file' => '/home/index.php', 'line' => 2]))->toBe('');
+    expect(MakeFileHandler::handle(['file' => '/home/index.php', 'line' => 2]))->toBe('phpstorm://open?file=/Users/jamesbond/bomb-disarmer/index.php&line=2');
 });
 
 it('returns empty string when no file is given ', function () {
