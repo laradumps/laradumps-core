@@ -7,10 +7,6 @@ use Ramsey\Uuid\Uuid;
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
-        if (function_exists('base_path')) {
-            return base_path();
-        }
-
         $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         if (str_contains($basePath, 'public')) {
