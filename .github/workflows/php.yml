@@ -37,7 +37,7 @@ jobs:
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Code Style 👨‍🏭
-        run: composer test:lint
+        run: composer test:pint
         if: runner.os == 'Linux'
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1

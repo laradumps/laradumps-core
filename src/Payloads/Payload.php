@@ -3,13 +3,11 @@
 namespace LaraDumps\LaraDumpsCore\Payloads;
 
 use LaraDumps\LaraDumpsCore\Actions\Config;
-use LaraDumps\LaraDumpsCore\Concerns\Traceable;
 use LaraDumps\LaraDumpsCore\Support\IdeHandle;
+use Spatie\Backtrace\Frame;
 
 abstract class Payload
 {
-    use Traceable;
-
     private bool $dispatched = false;
 
     private string $notificationId;
@@ -18,11 +16,30 @@ abstract class Payload
 
     private ?bool $autoInvokeApp = null;
 
+    private ?Frame $frame = null;
+
     abstract public function type(): string;
 
     public function setDispatch(bool $dispatched): void
     {
         $this->dispatched = $dispatched;
+    }
+
+    public function setFrame(array | Frame $frame): void
+    {
+        if (is_array($frame)) {
+            $this->frame = new Frame(
+                file: $frame['file'],
+                lineNumber: $frame['line'],
+                arguments: null,
+                method: $frame['function'] ?? null,
+                class: $frame['class'] ?? null
+            );
+
+            return;
+        }
+
+        $this->frame = $frame;
     }
 
     public function getDispatch(): bool
@@ -47,7 +64,7 @@ abstract class Payload
 
     public function ideHandle(): array
     {
-        $ideHandle = new IdeHandle(trace: $this->trace);
+        $ideHandle = new IdeHandle($this->frame);
 
         return $ideHandle->make();
     }

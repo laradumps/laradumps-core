@@ -47,4 +47,29 @@ trait Colors
 
         return $this->color('blue');
     }
+
+    public function red(): LaraDumps
+    {
+        return $this->danger();
+    }
+
+    public function blue(): LaraDumps
+    {
+        return $this->info();
+    }
+
+    public function green(): LaraDumps
+    {
+        return $this->success();
+    }
+
+    public function orange(): LaraDumps
+    {
+        return $this->write();
+    }
+
+    public function black(): LaraDumps
+    {
+        return $this->dark();
+    }
 }

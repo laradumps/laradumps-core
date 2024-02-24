@@ -3,20 +3,25 @@
 namespace LaraDumps\LaraDumpsCore\Support;
 
 use LaraDumps\LaraDumpsCore\Actions\MakeFileHandler;
+use Spatie\Backtrace\Frame;
 
 class IdeHandle
 {
     public function __construct(
-        public array $trace = [],
+        public ?Frame $frame = null,
     ) {
     }
 
     public function make(): array
     {
-        $path = strval($this->trace['file'] ?? '');
-        $line = strval($this->trace['line'] ?? '');
+        if (empty($this->frame)) {
+            return [];
+        }
 
-        $fileHandle = MakeFileHandler::handle($this->trace);
+        $path = $this->frame->file;
+        $line = strval($this->frame->lineNumber);
+
+        $fileHandle = MakeFileHandler::handle($this->frame);
 
         if (str_contains($path, 'Laravel Kit')) {
             $fileHandle = '';

@@ -23,16 +23,26 @@ use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
     ValidateStringPayload};
 use LaraDumps\LaraDumpsCore\Support\Dumper;
 use Ramsey\Uuid\Uuid;
+use Spatie\Backtrace\{Backtrace, Frame};
 
 class LaraDumps
 {
     use Colors;
 
+    private array $backtraceExcludePaths = [
+        '/vendor/laravel/framework/src/Illuminate',
+        '/artisan',
+        '/vendor/livewire',
+        '/packages/laradumps',
+        '/packages/laradumps-core',
+        '/laradumps/laradumps/',
+        '/laradumps/laradumps-core/',
+    ];
+
     private bool $dispatched = false;
 
     public function __construct(
-        public string $notificationId = '',
-        private array $trace = [],
+        private string $notificationId = '',
     ) {
         if (!boolval(getenv('DS_RUNNING_IN_TESTS'))) {
             $this->checkForEnvironment();
@@ -79,10 +89,13 @@ class LaraDumps
         }
     }
 
-    public function send(Payload $payload): Payload
+    public function send(Payload $payload, bool $withFrame = true): Payload
     {
-        if (!empty($this->trace)) {
-            $payload->setTrace($this->trace);
+        if ($withFrame) {
+            $backtrace = Backtrace::create();
+            $backtrace = $backtrace->applicationPath(appBasePath());
+            $frame     = $this->parseFrame($backtrace);
+            $payload->setFrame($frame);
         }
 
         $payload->setNotificationId($this->notificationId);
@@ -100,13 +113,13 @@ class LaraDumps
         return $payload;
     }
 
-    public function write(mixed $args = null, ?bool $autoInvokeApp = null, array $trace = []): self
+    public function write(mixed $args = null, ?bool $autoInvokeApp = null): self
     {
+        /** @var Payload $payload */
         [$payload, $id] = $this->beforeWrite($args)();
 
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->setDumpId($id);
-        $payload->setTrace($trace);
 
         $this->send($payload);
 
@@ -153,7 +166,6 @@ class LaraDumps
     public function label(string $label): LaraDumps
     {
         $payload = new LabelPayload($label);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -194,7 +206,6 @@ class LaraDumps
     public function isJson(): LaraDumps
     {
         $payload = new ValidJsonPayload();
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -213,7 +224,7 @@ class LaraDumps
         $payload->setContent($content)
             ->setCaseSensitive($caseSensitive)
             ->setWholeWord($wholeWord)
-            ->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+            ->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -226,7 +237,6 @@ class LaraDumps
     public function phpinfo(): LaraDumps
     {
         $payload = new PhpInfoPayload();
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -239,7 +249,6 @@ class LaraDumps
     public function table(iterable|object $data = [], string $name = ''): LaraDumps
     {
         $payload = new TablePayload($data, $name);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -254,7 +263,6 @@ class LaraDumps
     public function time(string $reference): void
     {
         $payload = new TimeTrackPayload($reference);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
         $this->label($reference);
@@ -268,7 +276,7 @@ class LaraDumps
     public function stopTime(string $reference): void
     {
         $payload = new TimeTrackPayload($reference, true);
-        $payload->setTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
+        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
     }
@@ -306,5 +314,28 @@ class LaraDumps
         $this->dispatched = $dispatched->getDispatch();
 
         return $this;
+    }
+
+    public function parseFrame(Backtrace $backtrace): Frame | array
+    {
+        $frames = collect($backtrace->frames())
+            ->where('applicationFrame', true)
+            ->filter(function ($frame) {
+                $normalizedPath = str_replace('\\', '/', $frame->file);
+
+                foreach ($this->backtraceExcludePaths as $excludedPath) {
+                    if (str_contains($normalizedPath, $excludedPath)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })
+            ->toArray();
+
+        /** @var Frame $frame */
+        $frame = $frames[array_key_first($frames)];
+
+        return $frame;
     }
 }

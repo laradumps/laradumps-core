@@ -3,7 +3,7 @@
     "description": "A dump component for php code.",
     "homepage": "https://github.com/laradumps/laradumps-core",
     "license": "MIT",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "authors": [
         {
@@ -21,7 +21,8 @@
         "symfony/console": "^6.4|^7.0",
         "symfony/process": "^6.4|^7.0",
         "symfony/finder": "^6.4|^7.0",
-        "nunomaduro/termwind": "^1.15|^2.0"
+        "nunomaduro/termwind": "^1.15|^2.0",
+        "spatie/backtrace": "^1.5"
     },
     "require-dev": {
         "laravel/pint": "^1.13.7",
@@ -43,12 +44,12 @@
         }
     },
     "scripts": {
-        "lint": "PHP_CS_FIXER_IGNORE_ENV=1 ./vendor/bin/pint",
-        "test:lint": "./vendor/bin/pint --test",
+        "test:pint": "./vendor/bin/pint --test",
+        "pint:fix": "./vendor/bin/pint",
         "test:types": "./vendor/bin/phpstan analyse --ansi --memory-limit=-1",
         "test:tests": "./vendor/bin/pest --order-by random",
-        "tests": [
-            "@test:lint",
+        "verify": [
+            "@cs-fixer",
             "@test:types",
             "@test:tests"
         ]
