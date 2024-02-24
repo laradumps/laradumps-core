@@ -28,7 +28,7 @@ it('should return the correct payload to dump', function () {
     $payload   = new DumpPayload($args);
     $payload->setFrame($frame);
 
-    $payload = $laradumps->send($payload)->toArray();
+    $payload = $laradumps->send($payload, withFrame: false)->toArray();
 
     expect($payload)
         ->id->toBe($notificationId)

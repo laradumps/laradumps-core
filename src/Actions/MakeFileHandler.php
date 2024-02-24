@@ -11,6 +11,8 @@ final class MakeFileHandler
         string $keyHandler = 'DS_FILE_HANDLER',
         string $forceProjectPath = 'DS_PROJECT_PATH'
     ): string {
+        $frame = is_array($frame) ? new Frame($frame['file'], $frame['line'] ?? 1, null) : $frame;
+
         if (empty($frame->file)) {
             return '';
         }
