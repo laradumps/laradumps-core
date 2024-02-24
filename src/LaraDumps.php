@@ -23,11 +23,21 @@ use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
     ValidateStringPayload};
 use LaraDumps\LaraDumpsCore\Support\Dumper;
 use Ramsey\Uuid\Uuid;
-use Spatie\Backtrace\Frame;
+use Spatie\Backtrace\{Backtrace, Frame};
 
 class LaraDumps
 {
     use Colors;
+
+    private array $backtraceExcludePaths = [
+        '/vendor/laravel/framework/src/Illuminate',
+        '/artisan',
+        '/vendor/livewire',
+        '/packages/laradumps',
+        '/packages/laradumps-core',
+        '/laradumps/laradumps/',
+        '/laradumps/laradumps-core/',
+    ];
 
     private bool $dispatched = false;
 
@@ -79,8 +89,15 @@ class LaraDumps
         }
     }
 
-    public function send(Payload $payload): Payload
+    public function send(Payload $payload, bool $withFrame = true): Payload
     {
+        if ($withFrame) {
+            $backtrace = Backtrace::create();
+            $backtrace = $backtrace->applicationPath(appBasePath());
+            $frame     = $this->parseFrame($backtrace);
+            $payload->setFrame($frame);
+        }
+
         $payload->setNotificationId($this->notificationId);
 
         $sendPayload = new SendPayload();
@@ -96,23 +113,13 @@ class LaraDumps
         return $payload;
     }
 
-    public function write(mixed $args = null, ?bool $autoInvokeApp = null, array|\Spatie\Backtrace\Frame $frame = []): self
+    public function write(mixed $args = null, ?bool $autoInvokeApp = null): self
     {
         /** @var Payload $payload */
         [$payload, $id] = $this->beforeWrite($args)();
 
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->setDumpId($id);
-
-        $payload->setFrame(
-            is_array($frame) ? new Frame(
-                file: $frame['file'],
-                lineNumber: $frame['line'],
-                arguments: null,
-                method: $frame['function'] ?? null,
-                class: $frame['class'] ?? null
-            ) : $frame
-        );
 
         $this->send($payload);
 
@@ -159,7 +166,6 @@ class LaraDumps
     public function label(string $label): LaraDumps
     {
         $payload = new LabelPayload($label);
-        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -200,7 +206,6 @@ class LaraDumps
     public function isJson(): LaraDumps
     {
         $payload = new ValidJsonPayload();
-        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -232,7 +237,6 @@ class LaraDumps
     public function phpinfo(): LaraDumps
     {
         $payload = new PhpInfoPayload();
-        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -245,7 +249,6 @@ class LaraDumps
     public function table(iterable|object $data = [], string $name = ''): LaraDumps
     {
         $payload = new TablePayload($data, $name);
-        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
 
@@ -260,7 +263,6 @@ class LaraDumps
     public function time(string $reference): void
     {
         $payload = new TimeTrackPayload($reference);
-        $payload->setFrame(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]);
 
         $this->send($payload);
         $this->label($reference);
@@ -312,5 +314,28 @@ class LaraDumps
         $this->dispatched = $dispatched->getDispatch();
 
         return $this;
+    }
+
+    public function parseFrame(Backtrace $backtrace): Frame | array
+    {
+        $frames = collect($backtrace->frames())
+            ->where('applicationFrame', true)
+            ->filter(function ($frame) {
+                $normalizedPath = str_replace('\\', '/', $frame->file);
+
+                foreach ($this->backtraceExcludePaths as $excludedPath) {
+                    if (str_contains($normalizedPath, $excludedPath)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })
+            ->toArray();
+
+        /** @var Frame $frame */
+        $frame = $frames[array_key_first($frames)];
+
+        return $frame;
     }
 }

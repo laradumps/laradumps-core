@@ -25,10 +25,10 @@ it('should return the correct payload to dump', function () {
     ];
 
     $laradumps = new LaraDumps(notificationId: $notificationId);
-    $payload = new DumpPayload($args);
+    $payload   = new DumpPayload($args);
     $payload->setFrame($frame);
 
-    $payload   = $laradumps->send($payload)->toArray();
+    $payload = $laradumps->send($payload)->toArray();
 
     expect($payload)
         ->id->toBe($notificationId)
@@ -63,11 +63,10 @@ it('should return the correct payload to table_v2', function () {
     $notificationId = Uuid::uuid4()->toString();
 
     $laradumps = new LaraDumps($notificationId);
-    $payload = new TableV2Payload($data);
+    $payload   = new TableV2Payload($data);
     $payload->setFrame($frame);
 
-    $payload   = $laradumps->send($payload)->toArray();
-
+    $payload = $laradumps->send($payload)->toArray();
 
     expect($payload)
         ->id->toBe($notificationId)

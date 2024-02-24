@@ -44,12 +44,12 @@
         }
     },
     "scripts": {
-        "lint": "PHP_CS_FIXER_IGNORE_ENV=1 ./vendor/bin/pint",
-        "test:lint": "./vendor/bin/pint --test",
+        "test:pint": "./vendor/bin/pint --test",
+        "pint:fix": "./vendor/bin/pint",
         "test:types": "./vendor/bin/phpstan analyse --ansi --memory-limit=-1",
         "test:tests": "./vendor/bin/pest --order-by random",
-        "tests": [
-            "@test:lint",
+        "verify": [
+            "@cs-fixer",
             "@test:types",
             "@test:tests"
         ]
