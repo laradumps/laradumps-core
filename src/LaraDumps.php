@@ -337,7 +337,7 @@ class LaraDumps
             ->toArray();
 
         /** @var Frame $frame */
-        $frame = $frames[array_key_first($frames)];
+        $frame = $frames[array_key_first($frames)] ?? [];
 
         return $frame;
     }
