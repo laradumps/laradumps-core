@@ -234,6 +234,7 @@ class LaraDumps
         $payload = new TablePayload($data, $name);
 
         $this->send($payload);
+        $this->label('Table');
 
         return $this;
     }
