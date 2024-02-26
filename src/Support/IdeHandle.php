@@ -2,7 +2,6 @@
 
 namespace LaraDumps\LaraDumpsCore\Support;
 
-use LaraDumps\LaraDumpsCore\Actions\MakeFileHandler;
 use Spatie\Backtrace\Frame;
 
 class IdeHandle
@@ -15,24 +14,24 @@ class IdeHandle
     public function make(): array
     {
         if (empty($this->frame)) {
-            return [];
+            return [
+                'path'       => 'Tinker',
+                'class_name' => 'Tinker',
+                'line'       => 1,
+            ];
         }
 
         $path = $this->frame->file;
         $line = strval($this->frame->lineNumber);
 
-        $fileHandle = MakeFileHandler::handle($this->frame);
-
         if (str_contains($path, 'Laravel Kit')) {
-            $fileHandle = '';
-            $path       = 'Laravel Kit';
-            $line       = '';
+            $path = 'Laravel Kit';
+            $line = '';
         }
 
         if (str_contains($path, 'eval()')) {
-            $fileHandle = '';
-            $path       = 'Tinker';
-            $line       = '';
+            $path = 'Tinker';
+            $line = '';
         }
 
         $path = str_replace(appBasePath() . DIRECTORY_SEPARATOR, '', strval($path));
@@ -45,7 +44,6 @@ class IdeHandle
         $className = end($className);
 
         return [
-            'handler'    => $fileHandle,
             'path'       => $path,
             'class_name' => $className,
             'line'       => $line,

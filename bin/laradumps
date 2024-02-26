@@ -8,12 +8,10 @@ if (file_exists(__DIR__ . '/../../../autoload.php')) {
 }
 
 use LaraDumps\LaraDumpsCore\Commands\CheckCommand;
-use LaraDumps\LaraDumpsCore\Commands\ClearV1ConfigCommand;
-use LaraDumps\LaraDumpsCore\Commands\ConfigureDesktopAppCommand;
+use LaraDumps\LaraDumpsCore\Commands\InitCommand;
 use Symfony\Component\Console\Application;
 
-$application = new Application('LaraDumps Core', 'v1.0.0');
-$application->add(new ClearV1ConfigCommand());
-$application->add(new ConfigureDesktopAppCommand());
+$application = new Application('LaraDumps Core', 'v2.0.0');
+$application->add(new InitCommand());
 $application->add(new CheckCommand());
 $application->run();

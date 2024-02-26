@@ -9,7 +9,7 @@ trait Colors
 {
     public function danger(): LaraDumps
     {
-        if (Config::get('send_color_in_screen')) {
+        if (Config::get('config.color_in_screen')) {
             return $this->toScreen('danger');
         }
 
@@ -23,7 +23,7 @@ trait Colors
 
     public function warning(): LaraDumps
     {
-        if (boolval(Config::get('send_color_in_screen'))) {
+        if (boolval(Config::get('config.color_in_screen'))) {
             return $this->toScreen('warning');
         }
 
@@ -32,7 +32,7 @@ trait Colors
 
     public function success(): LaraDumps
     {
-        if (boolval(Config::get('send_color_in_screen'))) {
+        if (boolval(Config::get('config.color_in_screen'))) {
             return $this->toScreen('success');
         }
 
@@ -41,7 +41,7 @@ trait Colors
 
     public function info(): LaraDumps
     {
-        if (boolval(Config::get('send_color_in_screen'))) {
+        if (boolval(Config::get('config.color_in_screen'))) {
             return $this->toScreen('info');
         }
 

@@ -7,18 +7,15 @@ use Ramsey\Uuid\Uuid;
 
 final class SendPayload
 {
-    protected string $port = '9191';
+    private string $host = '127.0.0.1';
+
+    private string $port = '9191';
 
     protected string $resource = '/api/dumps';
 
     public function __construct(private ?string $appUrl = null)
     {
-        $this->appUrl = ($this->appUrl ?: Config::get('host')) . ':' . $this->port . $this->resource;
-    }
-
-    public static function baseUrl(string $host): SendPayload
-    {
-        return new self($host);
+        $this->appUrl ??= $this->getAppUrl();
     }
 
     public static function make(): SendPayload
@@ -31,6 +28,26 @@ final class SendPayload
      */
     public function handle(array|Payload $payload): bool
     {
+        $primaryResponse = $this->sendRequest(payload: $payload);
+
+        if (!$primaryResponse) {
+            $secondaryUrl = Config::get('app.secondary_host') . ':' . Config::get('app.port') . $this->resource;
+
+            return $this->sendRequest($secondaryUrl, $payload);
+        }
+
+        return false;
+    }
+
+    /**
+     * Sends a cURL request and returns true if successful, false otherwise.
+     */
+    private function sendRequest(?string $url = null, array|Payload $payload = []): bool
+    {
+        if (is_null($url)) {
+            $url = $this->appUrl;
+        }
+
         $curlRequest = curl_init();
 
         curl_setopt_array($curlRequest, [
@@ -39,7 +56,7 @@ final class SendPayload
             CURLOPT_FOLLOWLOCATION    => true,
             CURLOPT_HTTPHEADER        => ['Content-Type: application/json', 'Accept: application/json'],
             CURLOPT_POSTFIELDS        => json_encode($payload),
-            CURLOPT_URL               => $this->appUrl,
+            CURLOPT_URL               => $url,
             CURLOPT_TIMEOUT           => 1,
             CURLOPT_CONNECTTIMEOUT_MS => 100,
         ]);
@@ -55,5 +72,10 @@ final class SendPayload
         }
 
         return Uuid::isValid($result->id ?? '');
+    }
+
+    private function getAppUrl(): string
+    {
+        return Config::get('app.primary_host', $this->host) . ':' . Config::get('app.port', $this->port) . $this->resource;
     }
 }

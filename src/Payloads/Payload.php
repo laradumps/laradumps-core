@@ -91,20 +91,18 @@ abstract class Payload
             define('LARADUMPS_REQUEST_ID', uniqid());
         }
 
-        $dateTime = date('H:i:s');
-
-        if (function_exists('now')) {
-            $dateTime = now()->format('H:i:s');
-        };
+        $dateTime = new \DateTime();
+        $dateTime = $dateTime->format('H:i:s');
 
         return [
-            'id'         => $this->notificationId,
-            'request_id' => LARADUMPS_REQUEST_ID,
-            'sf_dump_id' => $this->dumpId,
-            'type'       => $this->type(),
-            'meta'       => [
+            'id'               => $this->notificationId,
+            'application_path' => appBasePath(),
+            'request_id'       => LARADUMPS_REQUEST_ID,
+            'sf_dump_id'       => $this->dumpId,
+            'type'             => $this->type(),
+            'meta'             => [
                 'laradumps_version' => $this->getInstalledVersion(),
-                'auto_invoke_app'   => $this->autoInvokeApp ?? boolval(Config::get('auto_invoke_app')),
+                'auto_invoke_app'   => $this->autoInvokeApp ?? boolval(Config::get('config.auto_invoke_app')),
             ],
             $this->type() => $this->content(),
             'ide_handle'  => $ideHandle,

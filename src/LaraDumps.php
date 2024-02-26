@@ -2,9 +2,7 @@
 
 namespace LaraDumps\LaraDumpsCore;
 
-use Dotenv\Dotenv;
-use Dotenv\Exception\InvalidPathException;
-use LaraDumps\LaraDumpsCore\Actions\{Config, InstallLaraDumps, SendPayload, Support};
+use LaraDumps\LaraDumpsCore\Actions\{Config, SendPayload, Support};
 use LaraDumps\LaraDumpsCore\Concerns\Colors;
 use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
     ClearPayload,
@@ -44,12 +42,8 @@ class LaraDumps
     public function __construct(
         private string $notificationId = '',
     ) {
-        if (!boolval(getenv('DS_RUNNING_IN_TESTS'))) {
-            $this->checkForEnvironment();
-        }
-
-        if (Config::get('sleep')) {
-            $sleep = intval(Config::get('sleep'));
+        if (Config::get('config.sleep')) {
+            $sleep = intval(Config::get('config.sleep'));
             sleep($sleep);
         }
 
@@ -73,20 +67,6 @@ class LaraDumps
                 $id,
             ];
         };
-    }
-
-    private function checkForEnvironment(): void
-    {
-        try {
-            $dotenv = Dotenv::createImmutable(appBasePath(), '.env');
-            $dotenv->load();
-
-            if (empty(Config::get('host'))) {
-                InstallLaraDumps::install();
-            }
-        } catch (InvalidPathException) {
-            InstallLaraDumps::install();
-        }
     }
 
     public function send(Payload $payload, bool $withFrame = true): Payload
@@ -299,24 +279,6 @@ class LaraDumps
     public function getDispatch(): bool
     {
         return $this->dispatched;
-    }
-
-    public function configure(): static
-    {
-        if (class_exists(\LaraDumps\LaraDumps\Payloads\InstallationPayload::class)) {
-            $installationPayload = \LaraDumps\LaraDumps\Payloads\InstallationPayload::class;
-        } else {
-            $installationPayload = InstallationPayload::class;
-        }
-
-        /** @phpstan-ignore-next-line  */
-        $installationPayloadInstance = new $installationPayload($_ENV['APP_NAME'] ?? "");
-
-        /** @phpstan-ignore-next-line  */
-        $dispatched       = $this->send($installationPayloadInstance);
-        $this->dispatched = $dispatched->getDispatch();
-
-        return $this;
     }
 
     public function parseFrame(Backtrace $backtrace): Frame | array

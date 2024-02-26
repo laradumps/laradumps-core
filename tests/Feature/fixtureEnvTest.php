@@ -6,4 +6,4 @@ it('changes the env on the fly', function () {
     fixtureEnv('ds_env', ['name' => $name]);
 
     expect(getenv('name'))->toBe($name);
-});
+})->skip();

@@ -2,65 +2,61 @@
 
 namespace LaraDumps\LaraDumpsCore\Actions;
 
-use Exception;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
-    protected static function getEnvironment(): array
+    public static function get(string $key, string | bool | null $default = null): string | bool | null
     {
-        return [
-            'host'                      => 'DS_APP_HOST',
-            'sleep'                     => 'DS_SLEEP',
-            'auto_clear_on_page_reload' => 'DS_AUTO_CLEAR_ON_PAGE_RELOAD',
-            'auto_invoke_app'           => 'DS_AUTO_INVOKE_APP',
-            'preferred_ide'             => 'DS_PREFERRED_IDE',
-            'send_color_in_screen'      => 'DS_SEND_COLOR_IN_SCREEN',
-            'testing'                   => 'DS_RUNNING_IN_TESTS',
-            'installed'                 => 'DS_INSTALLED',
-        ];
+        $file = appBasePath() . 'laradumps.yaml';
+
+        try {
+            /** @var array|null $content */
+            $content = Yaml::parseFile($file);
+
+            $keys  = explode('.', $key);
+            $value = null;
+
+            foreach ($keys as $key) {
+                if (!isset($content[$key])) {
+                    continue;
+                }
+
+                $value = $content[$key];
+            }
+
+            if (is_null($content)) {
+                return $default;
+            }
+
+            return $value;
+        } catch (ParseException) {
+            return $default;
+        }
     }
 
-    public static function getAvailableConfig(): array
-    {
-        return array_values(array_filter(static::getEnvironment(), function ($key) {
-            return !in_array($key, [
-                'DS_APP_HOST',
-                'DS_SLEEP',
-                'DS_INSTALLED',
-                'DS_PREFERRED_IDE',
-                'DS_RUNNING_IN_TESTS',
-            ]);
-        }));
-    }
-
-    public static function get(string $key): mixed
-    {
-        $value = $_ENV[static::getEnvironment()[$key] ?? null] ?? false;
-
-        return match ($value) {
-            'true'  => true,
-            'false' => false,
-            default => $value,
-        };
-    }
-
-    /**
-     * @throws Exception
-     */
     public static function set(string $key, mixed $value): void
     {
-        if (!isset(static::getEnvironment()[$key])) {
-            return;
+        $filePath = appBasePath() . 'laradumps.yaml';
+
+        $fileContent = file_exists($filePath) ? Yaml::parseFile($filePath) : [];
+
+        $keys = explode('.', $key);
+        /** @var array $currentArray */
+        $currentArray = &$fileContent;
+
+        foreach ($keys as $key) {
+            if (!isset($currentArray[$key])) {
+                $currentArray[$key] = [];
+            }
+            $currentArray = &$currentArray[$key];
         }
 
-        $value = match ($value) {
-            '0', 0 => false,
-            '1', 1 => true,
-            default => $value,
-        };
+        $currentArray = $value;
 
-        $_ENV[static::getEnvironment()[$key]] = $value;
+        $yamlContent = Yaml::dump($fileContent);
 
-        WriteEnv::handle([static::getEnvironment()[$key] => $value]);
+        file_put_contents($filePath, $yamlContent);
     }
 }

@@ -1,0 +1,24 @@
+app:
+    primary_host: 127.0.0.1
+    secondary_host: host.docker.internal
+    port: 9191
+config:
+    auto_clear_on_page_reload: false
+    auto_invoke_app: false
+    theme: dark
+    sleep: 0
+    color_in_screen: false
+    project_path: ''
+observers:
+    queries: false
+    logs_applications: false
+    logs_vendor: false
+    logs_deprecated: false
+    http_client_requests: false
+    http: false
+    jobs: false
+    ache: false
+    commands: false
+    scheduled_commands: false
+    gate: false
+    mail: false
