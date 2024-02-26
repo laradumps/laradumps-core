@@ -12,25 +12,19 @@ class Config
         $file = appBasePath() . 'laradumps.yaml';
 
         try {
-            /** @var array|null $content */
             $content = Yaml::parseFile($file);
 
-            $keys  = explode('.', $key);
-            $value = null;
+            $keys = explode('.', $key);
 
             foreach ($keys as $key) {
                 if (!isset($content[$key])) {
-                    continue;
+                    return null;
                 }
 
-                $value = $content[$key];
+                $content = $content[$key];
             }
 
-            if (is_null($content)) {
-                return $default;
-            }
-
-            return $value;
+            return $content;
         } catch (ParseException) {
             return $default;
         }

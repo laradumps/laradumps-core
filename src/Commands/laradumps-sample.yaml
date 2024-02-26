@@ -10,15 +10,15 @@ config:
     color_in_screen: false
     project_path: ''
 observers:
-    queries: false
-    logs_applications: false
-    logs_vendor: false
-    logs_deprecated: false
-    http_client_requests: false
-    http: false
-    jobs: false
-    ache: false
-    commands: false
-    scheduled_commands: false
-    gate: false
-    mail: false
+    laravel_queries: false
+    laravel_logs_applications: false
+    laravel_logs_vendor: false
+    laravel_logs_deprecated: false
+    laravel_http_client_requests: false
+    laravel_http: false
+    laravel_jobs: false
+    laravel_ache: false
+    laravel_commands: false
+    laravel_scheduled_commands: false
+    laravel_gate: false
+    laravel_mail: false
