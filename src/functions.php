@@ -3,6 +3,7 @@
 use LaraDumps\LaraDumps\LaraDumps as LaravelLaraDumps;
 use LaraDumps\LaraDumpsCore\LaraDumps;
 use Ramsey\Uuid\Uuid;
+use Spatie\Backtrace\Backtrace;
 
 if (!function_exists('appBasePath')) {
     function appBasePath(): string

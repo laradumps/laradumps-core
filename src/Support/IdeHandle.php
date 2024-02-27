@@ -15,9 +15,9 @@ class IdeHandle
     {
         if (empty($this->frame)) {
             return [
-                'path'       => 'Tinker',
-                'class_name' => 'Tinker',
-                'line'       => 1,
+                'path'       => 'empty',
+                'class_name' => 'empty',
+                'line'       => '',
             ];
         }
 
