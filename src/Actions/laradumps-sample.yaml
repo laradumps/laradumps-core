@@ -3,7 +3,7 @@ app:
     secondary_host: host.docker.internal
     port: 9191
     workdir: /var/www/html/
-    project_path: /Users/luan.freitas/Documents/laradumps/laradumps-playground/
+    project_path:
 config:
     sleep: 0
     color_in_screen: false
