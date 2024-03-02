@@ -3,7 +3,7 @@
     "description": "A dump component for php code.",
     "homepage": "https://github.com/laradumps/laradumps-core",
     "license": "MIT",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "authors": [
         {
