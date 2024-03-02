@@ -7,13 +7,31 @@ use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
+    public static function publish(string $pwd, string $filepath): bool
+    {
+        try {
+            /** @var array $fileContent */
+            $fileContent = Yaml::parseFile($filepath);
+
+            $fileContent['app']['project_path'] = $pwd;
+
+            $yamlContent = Yaml::dump($fileContent);
+
+            file_put_contents($pwd . 'laradumps.yaml', $yamlContent);
+
+            return true;
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
     public static function get(string $key, string | bool | null $default = null): string | bool | null
     {
-        $file = appBasePath() . 'laradumps.yaml';
-
         try {
-            $content = Yaml::parseFile($file);
+            /** @var array $content */
+            $content = Yaml::parseFile(appBasePath() . 'laradumps.yaml');
 
+            /** @var array $keys */
             $keys = explode('.', $key);
 
             foreach ($keys as $key) {
@@ -52,5 +70,10 @@ class Config
         $yamlContent = Yaml::dump($fileContent);
 
         file_put_contents($filePath, $yamlContent);
+    }
+
+    public static function exists(): bool
+    {
+        return file_exists(appBasePath() . 'laradumps.yaml');
     }
 }

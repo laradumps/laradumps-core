@@ -41,12 +41,11 @@ class LaraDumps
     public function __construct(
         private string $notificationId = '',
     ) {
-        if (Config::get('config.sleep')) {
-            $sleep = intval(Config::get('config.sleep'));
+        if ($sleep = intval(Config::get('config.sleep'))) {
             sleep($sleep);
         }
 
-        $this->notificationId = !empty($notificationId) ? $this->notificationId : Uuid::uuid4()->toString();
+        $this->notificationId = Uuid::uuid4()->toString();
     }
 
     protected function beforeWrite(mixed $args): \Closure

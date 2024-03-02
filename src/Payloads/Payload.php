@@ -69,11 +69,6 @@ abstract class Payload
         return $ideHandle->make();
     }
 
-    public function customHandle(): array
-    {
-        return [];
-    }
-
     public function autoInvokeApp(?bool $enable = null): void
     {
         $this->autoInvokeApp = $enable;
@@ -83,20 +78,13 @@ abstract class Payload
     {
         $ideHandle = $this->ideHandle();
 
-        if (!empty($this->customHandle())) {
-            $ideHandle = $this->customHandle();
-        }
-
         if (!defined('LARADUMPS_REQUEST_ID')) {
             define('LARADUMPS_REQUEST_ID', uniqid());
         }
 
-        $dateTime = new \DateTime();
-        $dateTime = $dateTime->format('H:i:s');
-
         return [
             'id'               => $this->notificationId,
-            'application_path' => appBasePath(),
+            'application_path' => $this->applicationPath(),
             'request_id'       => LARADUMPS_REQUEST_ID,
             'sf_dump_id'       => $this->dumpId,
             'type'             => $this->type(),
@@ -106,7 +94,6 @@ abstract class Payload
             ],
             $this->type() => $this->content(),
             'ide_handle'  => $ideHandle,
-            'date_time'   => $dateTime,
         ];
     }
 
@@ -121,5 +108,13 @@ abstract class Payload
         }
 
         return '0.0.0';
+    }
+
+    private function applicationPath(): string
+    {
+        /** @var string $path */
+        $path = Config::get('app.project_path', '');
+
+        return $path;
     }
 }

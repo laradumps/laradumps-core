@@ -1,0 +1,13 @@
+app:
+    primary_host: 127.0.0.1
+    secondary_host: host.docker.internal
+    port: 9191
+    workdir: /var/www/html/
+    project_path: /Users/luan.freitas/Documents/laradumps/laradumps-playground/
+config:
+    sleep: 0
+    color_in_screen: false
+    docker: false
+observers:
+    dump: false
+    auto_invoke_app: false
