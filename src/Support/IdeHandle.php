@@ -14,44 +14,29 @@ class IdeHandle
 
     public function make(): array
     {
+        $workDir = Config::get('app.workdir');
+
+        /** @var null|string $projectPath */
+        $projectPath = Config::get('app.project_path');
+
         if (empty($this->frame)) {
             return [
-                'path'       => 'empty',
-                'class_name' => 'empty',
-                'line'       => '',
+                'path'         => 'empty',
+                'class_name'   => 'empty',
+                'real_path'    => '',
+                'project_path' => $projectPath,
+                'line'         => '',
+                'separator'    => DIRECTORY_SEPARATOR,
             ];
         }
 
         $realPath = $this->frame->file;
         $line     = strval($this->frame->lineNumber);
 
-        if (str_contains($realPath, 'Laravel Kit')) {
-            $realPath = 'Laravel Kit';
-            $line     = '';
-        }
-
-        if (str_contains($realPath, 'eval()')) {
-            $realPath = 'Tinker';
-            $line     = '';
-        }
-
         /** @var string $realPath */
         $realPath = str_replace(appBasePath() . DIRECTORY_SEPARATOR, '', strval($realPath));
 
-        $workDir     = Config::get('app.workdir');
-
-        /** @var null|string $projectPath */
-        $projectPath = Config::get('app.project_path');
-
-        if (!empty($projectPath)) {
-            $projectPath = str_replace(strval(runningInTest() ? $realPath : appBasePath()), $projectPath, strval($realPath));
-        }
-
-        if (str_contains($realPath, 'resources')) {
-            $realPath = str_replace('resources/views/', '', strval($realPath));
-        }
-
-        $className = explode('/', $realPath);
+        $className = explode(DIRECTORY_SEPARATOR, $realPath);
         $className = end($className);
 
         return [
@@ -60,6 +45,7 @@ class IdeHandle
             'real_path'    => $realPath,
             'class_name'   => $className,
             'line'         => $line,
+            'separator'    => DIRECTORY_SEPARATOR,
         ];
     }
 }
