@@ -17,7 +17,7 @@ class InitCommand extends Command
 {
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $fileContent = Yaml::parseFile(__DIR__ . '/Commands/laradumps-sample.yaml');
+        $fileContent = Yaml::parseFile(__DIR__ . '/Commands/laradumps-base.yaml');
         $yamlContent = Yaml::dump($fileContent);
 
         $filePath = appBasePath() . 'laradumps.yaml';

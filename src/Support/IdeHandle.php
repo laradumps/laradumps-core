@@ -19,6 +19,9 @@ class IdeHandle
         /** @var null|string $projectPath */
         $projectPath = Config::get('app.project_path');
 
+        /** @var null|string $wslConfig */
+        $wslConfig = Config::get('app.wsl_config');
+
         if (empty($this->frame)) {
             return [
                 'path'         => 'empty',
@@ -27,6 +30,7 @@ class IdeHandle
                 'project_path' => $projectPath,
                 'line'         => '',
                 'separator'    => DIRECTORY_SEPARATOR,
+                'wsl_config'   => $wslConfig,
             ];
         }
 
@@ -46,6 +50,7 @@ class IdeHandle
             'class_name'   => $className,
             'line'         => $line,
             'separator'    => DIRECTORY_SEPARATOR,
+            'wsl_config'   => $wslConfig,
         ];
     }
 }

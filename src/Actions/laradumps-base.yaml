@@ -4,10 +4,9 @@ app:
     port: 9191
     workdir: /var/www/html/
     project_path:
+    wsl_config: wsl+Ubuntu
 config:
     sleep: 0
-    color_in_screen: false
-    docker: false
 observers:
-    dump: false
+    color_in_screen: false
     auto_invoke_app: false
