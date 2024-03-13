@@ -36,7 +36,7 @@ class Config
 
             foreach ($keys as $key) {
                 if (!isset($content[$key])) {
-                    return null;
+                    return $default;
                 }
 
                 $content = $content[$key];
