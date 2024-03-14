@@ -1,8 +1,7 @@
 <?php
 
-namespace LaraDumps\LaraDumpsCore\Support;
+namespace LaraDumps\LaraDumpsCore\Actions;
 
-use LaraDumps\LaraDumpsCore\Actions\Support;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\HtmlDumper;

@@ -2,8 +2,7 @@
 
 namespace LaraDumps\LaraDumpsCore\Payloads;
 
-use LaraDumps\LaraDumpsCore\Actions\Config;
-use LaraDumps\LaraDumpsCore\Support\IdeHandle;
+use LaraDumps\LaraDumpsCore\Actions\{Config, IdeHandle};
 use Spatie\Backtrace\Frame;
 
 abstract class Payload

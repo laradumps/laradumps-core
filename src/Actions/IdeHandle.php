@@ -1,8 +1,7 @@
 <?php
 
-namespace LaraDumps\LaraDumpsCore\Support;
+namespace LaraDumps\LaraDumpsCore\Actions;
 
-use LaraDumps\LaraDumpsCore\Actions\Config;
 use Spatie\Backtrace\Frame;
 
 class IdeHandle

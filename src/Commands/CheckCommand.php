@@ -3,7 +3,7 @@
 namespace LaraDumps\LaraDumpsCore\Commands;
 
 use Exception;
-use LaraDumps\LaraDumpsCore\Actions\{GitDirtyFiles, MakeFileHandler};
+use LaraDumps\LaraDumpsCore\Actions\GitDirtyFiles;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -257,10 +257,8 @@ class CheckCommand extends Command
             'line'     => $line + 1,
             'file'     => str_replace(appBasePath() . '/', '', $file->getRealPath()),
             'realPath' => 'file:///' . $file->getRealPath(),
-            'link'     => MakeFileHandler::handle([
-                'file' => $file->getRealPath(), 'line' => $line + 1,
-            ]),
-            'content' => $partialContent,
+            'link'     => $file->getRealPath(),
+            'content'  => $partialContent,
         ];
     }
 

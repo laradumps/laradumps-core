@@ -2,9 +2,11 @@
 
 namespace LaraDumps\LaraDumpsCore;
 
+use LaraDumps\LaraDumpsCore\Actions\Dumper;
 use LaraDumps\LaraDumpsCore\Actions\{Config, SendPayload, Support};
 use LaraDumps\LaraDumpsCore\Concerns\Colors;
-use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
+use LaraDumps\LaraDumpsCore\Payloads\{
+    BenchmarkPayload,
     ClearPayload,
     CoffeePayload,
     ColorPayload,
@@ -17,8 +19,8 @@ use LaraDumps\LaraDumpsCore\Payloads\{BenchmarkPayload,
     TablePayload,
     TimeTrackPayload,
     ValidJsonPayload,
-    ValidateStringPayload};
-use LaraDumps\LaraDumpsCore\Support\Dumper;
+    ValidateStringPayload
+};
 use Ramsey\Uuid\Uuid;
 use Spatie\Backtrace\{Backtrace, Frame};
 

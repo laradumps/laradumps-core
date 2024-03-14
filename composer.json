@@ -1,6 +1,6 @@
 {
     "name": "laradumps/laradumps-core",
-    "description": "A dump component for php code.",
+    "description": "LaraDumps is a friendly app designed to boost your Laravel / PHP coding and debugging experience.",
     "homepage": "https://github.com/laradumps/laradumps-core",
     "license": "MIT",
     "minimum-stability": "dev",

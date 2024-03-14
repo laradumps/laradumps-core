@@ -75,10 +75,3 @@ if (!function_exists('dsq')) {
         }
     }
 }
-
-if (!function_exists('runningInTest')) {
-    function runningInTest(): bool
-    {
-        return isset($_SERVER['argv']) && !empty($_SERVER['argv']) ? str_contains($_SERVER['argv'][0], 'pest') : PHP_SAPI === "cli";
-    }
-}

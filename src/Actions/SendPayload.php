@@ -76,9 +76,6 @@ final class SendPayload
 
     private function getAppUrl(): string
     {
-        if (!file_exists(appBasePath() . 'laradumps.yml')) {
-        }
-
         return Config::get('app.primary_host', $this->host) . ':' . Config::get('app.port', $this->port) . $this->resource;
     }
 }

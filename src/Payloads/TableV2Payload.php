@@ -2,7 +2,7 @@
 
 namespace LaraDumps\LaraDumpsCore\Payloads;
 
-use LaraDumps\LaraDumpsCore\Support\Dumper;
+use LaraDumps\LaraDumpsCore\Actions\Dumper;
 
 class TableV2Payload extends Payload
 {

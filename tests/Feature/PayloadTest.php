@@ -1,8 +1,8 @@
 <?php
 
+use LaraDumps\LaraDumpsCore\Actions\Dumper;
 use LaraDumps\LaraDumpsCore\LaraDumps;
 use LaraDumps\LaraDumpsCore\Payloads\{DumpPayload, TableV2Payload};
-use LaraDumps\LaraDumpsCore\Support\Dumper;
 use Ramsey\Uuid\Uuid;
 
 beforeEach(function () {
