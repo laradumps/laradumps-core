@@ -8,5 +8,5 @@ app:
 config:
     sleep: 0
 observers:
-    color_in_screen: false
     auto_invoke_app: false
+    enabled_in_testing: false

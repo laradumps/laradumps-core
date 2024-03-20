@@ -75,3 +75,22 @@ if (!function_exists('dsq')) {
         }
     }
 }
+
+if (!function_exists('runningInTest')) {
+    function runningInTest(): bool
+    {
+        if (PHP_SAPI != 'cli') {
+            return false;
+        }
+
+        if (str_contains($_SERVER['argv'][0], 'phpunit')) {
+            return true;
+        }
+
+        if (str_contains($_SERVER['argv'][0], 'pest')) {
+            return true;
+        }
+
+        return false;
+    }
+}

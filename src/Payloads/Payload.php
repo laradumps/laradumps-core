@@ -89,7 +89,7 @@ abstract class Payload
             'type'             => $this->type(),
             'meta'             => [
                 'laradumps_version' => $this->getInstalledVersion(),
-                'auto_invoke_app'   => $this->autoInvokeApp ?? boolval(Config::get('config.auto_invoke_app')),
+                'auto_invoke_app'   => $this->autoInvokeApp ?? boolval(Config::get('observers.auto_invoke_app')),
             ],
             $this->type() => $this->content(),
             'ide_handle'  => $ideHandle,
