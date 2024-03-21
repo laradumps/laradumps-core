@@ -25,7 +25,7 @@ class Config
         }
     }
 
-    public static function get(string $key, string | bool | null $default = null): string | bool | null
+    public static function get(string $key, mixed $default = null): mixed
     {
         try {
             /** @var array $content */

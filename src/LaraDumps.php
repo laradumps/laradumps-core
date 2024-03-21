@@ -31,7 +31,6 @@ class LaraDumps
     private array $backtraceExcludePaths = [
         '/vendor/laravel/framework/src/Illuminate',
         '/artisan',
-        '/vendor/livewire',
         '/packages/laradumps',
         '/packages/laradumps-core',
         '/laradumps/laradumps/',
@@ -43,7 +42,9 @@ class LaraDumps
     public function __construct(
         private string $notificationId = '',
     ) {
-        if ($sleep = intval(Config::get('config.sleep'))) {
+        /** @var int $sleep */
+        $sleep = Config::get('config.sleep', 0);
+        if ($sleep > 0) {
             sleep($sleep);
         }
 
