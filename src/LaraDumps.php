@@ -44,6 +44,7 @@ class LaraDumps
     ) {
         /** @var int $sleep */
         $sleep = Config::get('config.sleep', 0);
+
         if ($sleep > 0) {
             sleep($sleep);
         }
