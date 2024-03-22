@@ -4,7 +4,7 @@ app:
     port: 9191
     workdir: /var/www/html/
     project_path:
-    wsl_config: wsl+Ubuntu
+    wsl_config: wsl+Ubuntu/ #wsl+Ubuntu20.04/
 config:
     sleep: 0
 observers:
