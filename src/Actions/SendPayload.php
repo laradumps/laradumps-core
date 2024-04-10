@@ -13,11 +13,6 @@ final class SendPayload
 
     protected string $resource = '/api/dumps';
 
-    public function __construct(private ?string $appUrl = null)
-    {
-        $this->appUrl ??= $this->getAppUrl();
-    }
-
     public static function make(): SendPayload
     {
         return new self();
@@ -28,7 +23,7 @@ final class SendPayload
      */
     public function handle(array|Payload $payload): bool
     {
-        $primaryResponse = $this->sendRequest(payload: $payload);
+        $primaryResponse = $this->sendRequest($this->getAppUrl(), payload: $payload);
 
         if (!$primaryResponse) {
             $secondaryUrl = Config::get('app.secondary_host') . ':' . Config::get('app.port') . $this->resource;
@@ -42,12 +37,8 @@ final class SendPayload
     /**
      * Sends a cURL request and returns true if successful, false otherwise.
      */
-    private function sendRequest(?string $url = null, array|Payload $payload = []): bool
+    private function sendRequest(string $url, array|Payload $payload = []): bool
     {
-        if (is_null($url)) {
-            $url = $this->appUrl;
-        }
-
         $curlRequest = curl_init();
 
         curl_setopt_array($curlRequest, [
