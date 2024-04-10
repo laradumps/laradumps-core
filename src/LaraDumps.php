@@ -78,7 +78,7 @@ class LaraDumps
             $backtrace = $backtrace->applicationPath(appBasePath());
             $frame     = $this->parseFrame($backtrace);
 
-            if (!empty($frame)) {
+            if (! empty($frame)) {
                 $payload->setFrame($frame);
             }
         }
@@ -133,7 +133,7 @@ class LaraDumps
     /**
      * Add new screen
      *
-     * @param  int  $raiseIn Delay in seconds for the app to raise and focus
+     * @param  int  $raiseIn  Delay in seconds for the app to raise and focus
      */
     public function toScreen(
         string $screenName,
@@ -200,8 +200,8 @@ class LaraDumps
     /**
      * Checks if content contains string.
      *
-     * @param  bool  $caseSensitive Search is case-sensitive
-     * @param  bool  $wholeWord Search for the whole words
+     * @param  bool  $caseSensitive  Search is case-sensitive
+     * @param  bool  $wholeWord  Search for the whole words
      */
     public function contains(string $content, bool $caseSensitive = false, bool $wholeWord = false): LaraDumps
     {
@@ -244,7 +244,7 @@ class LaraDumps
     /**
      * Starts clocking a code block execution time
      *
-     * @param  string  $reference Unique name for this time clocking
+     * @param  string  $reference  Unique name for this time clocking
      */
     public function time(string $reference): void
     {
@@ -257,7 +257,7 @@ class LaraDumps
     /**
      * Stops clocking a code block execution time
      *
-     * @param  string  $reference Unique name called on ds()->time()
+     * @param  string  $reference  Unique name called on ds()->time()
      */
     public function stopTime(string $reference): void
     {
@@ -284,22 +284,28 @@ class LaraDumps
         return $this->dispatched;
     }
 
-    public function parseFrame(Backtrace $backtrace): Frame | array
+    public function parseFrame(Backtrace $backtrace): Frame|array
     {
-        $frames = collect($backtrace->frames())
-            ->where('applicationFrame', true)
-            ->filter(function ($frame) {
+        $frames = [];
+
+        foreach ($backtrace->frames() as $frame) {
+            if ($frame->applicationFrame) {
                 $normalizedPath = str_replace('\\', '/', $frame->file);
+                $exclude        = false;
 
                 foreach ($this->backtraceExcludePaths as $excludedPath) {
                     if (str_contains($normalizedPath, $excludedPath)) {
-                        return false;
+                        $exclude = true;
+
+                        break;
                     }
                 }
 
-                return true;
-            })
-            ->toArray();
+                if (! $exclude) {
+                    $frames[] = $frame;
+                }
+            }
+        }
 
         /** @var Frame $frame */
         $frame = $frames[array_key_first($frames)] ?? [];
