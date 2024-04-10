@@ -78,7 +78,7 @@ class LaraDumps
             $backtrace = $backtrace->applicationPath(appBasePath());
             $frame     = $this->parseFrame($backtrace);
 
-            if (! empty($frame)) {
+            if (!empty($frame)) {
                 $payload->setFrame($frame);
             }
         }
@@ -301,7 +301,7 @@ class LaraDumps
                     }
                 }
 
-                if (! $exclude) {
+                if (!$exclude) {
                     $frames[] = $frame;
                 }
             }
