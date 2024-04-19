@@ -103,6 +103,10 @@ class LaraDumps
         /** @var Payload $payload */
         [$payload, $id] = $this->beforeWrite($args)();
 
+        if (empty($payload) && is_null($id)) {
+            return $this;
+        }
+
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->setDumpId($id);
 
