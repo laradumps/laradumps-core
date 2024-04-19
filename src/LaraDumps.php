@@ -100,13 +100,13 @@ class LaraDumps
 
     public function write(mixed $args = null, ?bool $autoInvokeApp = null): self
     {
-        /** @var Payload $payload */
         [$payload, $id] = $this->beforeWrite($args)();
 
         if (empty($payload) && is_null($id)) {
             return $this;
         }
 
+        /** @var Payload $payload */
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->setDumpId($id);
 
