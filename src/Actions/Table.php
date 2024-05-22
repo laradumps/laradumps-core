@@ -17,9 +17,11 @@ class Table
             $data = $data->toArray();
         }
 
-        $data = self::convertObjectsToArray($data);
-
         foreach ($data as $row) {
+            if (is_object($row)) {
+                $row = (array) $row;
+            }
+
             foreach ($row as $key => $item) {
                 if (!in_array($key, $columns)) {
                     $columns[] = $key;
@@ -29,7 +31,7 @@ class Table
             $value = [];
 
             foreach ($columns as $column) {
-                $value[$column] = (string) $row[$column];
+                $value[$column] = array_key_exists($column, $row) ? (string) $row[$column] : null;
             }
 
             $values[] = $value;
@@ -41,18 +43,5 @@ class Table
             'header' => $columns,
             'label'  => $name,
         ];
-    }
-
-    private static function convertObjectsToArray(array $data): array
-    {
-        foreach ($data as $key => $value) {
-            if (is_object($value)) {
-                $data[$key] = (array) $value;
-            } elseif (is_array($value)) {
-                $data[$key] = self::convertObjectsToArray($value);
-            }
-        }
-
-        return $data;
     }
 }
