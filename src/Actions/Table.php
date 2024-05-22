@@ -18,6 +18,10 @@ class Table
         }
 
         foreach ($data as $row) {
+            if (is_object($row)) {
+                $row = (array) $row;
+            }
+
             foreach ($row as $key => $item) {
                 if (!in_array($key, $columns)) {
                     $columns[] = $key;
