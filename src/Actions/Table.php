@@ -31,7 +31,7 @@ class Table
             $value = [];
 
             foreach ($columns as $column) {
-                $value[$column] = array_key_exists($column, $row) ? (string) $row[$column] : null;
+                $value[$column] = (string) $row[$column];
             }
 
             $values[] = $value;
