@@ -275,12 +275,13 @@ class CheckCommand extends Command
             . '</>'
         );
 
-        $line    = $content['line'] - 2;
+        $line    = $content['line'];
+        $startLine = $line - 2;
         $content = $content['content'];
 
         render(<<<HTML
             <div class="space-x-1 mx-2 mb-1">
-                <code line="$line" start-line="$line">
+                <code line="$line" start-line="$startLine">
                     $content
                 </code>
             </div>
