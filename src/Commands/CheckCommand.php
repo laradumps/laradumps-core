@@ -33,7 +33,8 @@ class CheckCommand extends Command
             ->addOption('ignore', null, InputArgument::OPTIONAL, 'Directories to be ignored separated by comma')
             ->addOption('text', null, InputArgument::OPTIONAL, 'Texts that will be searched separated by a comma')
             ->addOption('ignore-files', null, InputArgument::OPTIONAL, 'Files that will be ignored separated by a comma')
-            ->addArgument('stop-on-failure', InputArgument::OPTIONAL, 'Stop the search if a match is found');
+            ->addArgument('stop-on-failure', InputArgument::OPTIONAL, 'Stop the search if a match is found')
+            ->addOption('exactly', null, InputArgument::OPTIONAL, 'Search for exact occurrences');
     }
 
     /**
@@ -113,6 +114,16 @@ class CheckCommand extends Command
                         $contains = true;
 
                         break;
+                    }
+                }
+
+                if ($input->getOption('exactly')) {
+                    foreach ($this->prepareCustomTextToSearch($input) as $search) {
+                        if (strpos($lineContent, ltrim($search))) {
+                            $contains = true;
+
+                            break;
+                        }
                     }
                 }
 
@@ -204,9 +215,40 @@ class CheckCommand extends Command
 
         $values = explode(',', $checkInFor);
 
-        $mergedValues = array_unique(array_merge(explode(',', $this->defaultTextToSearch), $values));
+        $mergedValues = array_unique(
+            array_merge(
+                explode(
+                    ',',
+                    $this->defaultTextToSearch
+                ),
+                $values
+            )
+        );
 
         foreach ($mergedValues as $search) {
+            $search = trim($search);
+
+            if (strlen($search) > 0) {
+                $textToSearch[] = ' ' . $search;
+                $textToSearch[] = $search;
+                $textToSearch[] = '//' . $search;
+                $textToSearch[] = '->' . $search;
+                $textToSearch[] = $search . '(';
+                $textToSearch[] = '@' . $search;
+                $textToSearch[] = ' @' . $search;
+            }
+        }
+
+        return $textToSearch;
+    }
+
+    private function prepareCustomTextToSearch(InputInterface $input): array
+    {
+        $textToSearch = [];
+
+        $checkInFor = explode(',', $input->getOption('text') ?? '');
+
+        foreach ($checkInFor as $search) {
             $search = trim($search);
 
             if (strlen($search) > 0) {
