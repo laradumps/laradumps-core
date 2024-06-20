@@ -34,7 +34,7 @@ class CheckCommand extends Command
             ->addOption('text', null, InputArgument::OPTIONAL, 'Texts that will be searched separated by a comma')
             ->addOption('ignore-files', null, InputArgument::OPTIONAL, 'Files that will be ignored separated by a comma')
             ->addArgument('stop-on-failure', InputArgument::OPTIONAL, 'Stop the search if a match is found')
-            ->addOption('exactly', null, InputArgument::OPTIONAL, '...');
+            ->addOption('exactly', null, InputArgument::OPTIONAL, 'Search for exact occurrences');
     }
 
     /**
