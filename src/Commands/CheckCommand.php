@@ -174,7 +174,7 @@ class CheckCommand extends Command
     {
         $array = [];
 
-        foreach (explode(",", $input->getOption('dir') ?? "") as $dir) {
+        foreach (explode(',', $input->getOption('dir') ?? '') as $dir) {
             if (!empty($dir)) {
                 $array[] = appBasePath() . trim($dir);
             }
@@ -187,7 +187,7 @@ class CheckCommand extends Command
     {
         $array = [];
 
-        foreach (explode(",", $input->getOption('ignore-files') ?? "") as $dir) {
+        foreach (explode(',', $input->getOption('ignore-files') ?? '') as $dir) {
             if (!empty($dir)) {
                 $array[] = appBasePath() . trim($dir);
             }
@@ -200,11 +200,11 @@ class CheckCommand extends Command
     {
         $textToSearch = [];
 
-        $checkInFor = $input->getOption('text') ?? "";
+        $checkInFor = $input->getOption('text') ?? '';
 
-        $values = explode(",", $checkInFor);
+        $values = explode(',', $checkInFor);
 
-        $mergedValues = array_unique(array_merge(explode(",", $this->defaultTextToSearch), $values));
+        $mergedValues = array_unique(array_merge(explode(',', $this->defaultTextToSearch), $values));
 
         foreach ($mergedValues as $search) {
             $search = trim($search);
@@ -227,11 +227,11 @@ class CheckCommand extends Command
     {
         $array = [];
 
-        $ignore = $input->getOption('ignore') ?? "";
+        $ignore = $input->getOption('ignore') ?? '';
 
-        $values = explode(",", $ignore);
+        $values = explode(',', $ignore);
 
-        $mergedValues = array_unique(array_merge(explode(",", $this->defaultTextToIgnore), $values));
+        $mergedValues = array_unique(array_merge(explode(',', $this->defaultTextToIgnore), $values));
 
         foreach ($mergedValues as $search) {
             if (!empty($search)) {
@@ -253,11 +253,14 @@ class CheckCommand extends Command
         $partialContent .= $lineContent;
         $partialContent .= $fileContents[$line + 1] ?? '';
 
+        $realPath = isset($_ENV['IGNITION_LOCAL_SITES_PATH'])
+            ? $_ENV['IGNITION_LOCAL_SITES_PATH'] . DIRECTORY_SEPARATOR . str_replace(appBasePath(), '', $file->getRealPath())
+            : $file->getRealPath();
+
         return [
             'line'     => $line + 1,
-            'file'     => str_replace(appBasePath() . '/', '', $file->getRealPath()),
-            'realPath' => 'file:///' . $file->getRealPath(),
-            'link'     => $file->getRealPath(),
+            'file'     => $file->getRealPath(),
+            'realPath' => 'file:///' . $realPath,
             'content'  => $partialContent,
         ];
     }
@@ -268,20 +271,21 @@ class CheckCommand extends Command
 
         $output->writeln(
             ' ' . ($iterator + 1)
-            . ' <href=' . $content['link'] . '>'
+            . ' <href=' . $content['realPath'] . '>'
             . $content['realPath']
             . ':'
             . $content['line']
             . '</>'
         );
 
-        $line    = $content['line'] - 2;
-        $content = $content['content'];
+        $line      = $content['line'];
+        $startLine = $line - 2;
+        $content   = $content['content'];
 
         render(<<<HTML
             <div class="space-x-1 mx-2 mb-1">
-                <code line="$line" start-line="$line">
-                    $content
+                <code line="$line" start-line="$startLine">
+                $content
                 </code>
             </div>
             HTML);
