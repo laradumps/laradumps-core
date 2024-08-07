@@ -8,11 +8,10 @@ if (!function_exists('appBasePath')) {
     {
         $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
-        $possibleEndDirs = ['public', 'pub', 'wp-admin'];
-
-        foreach ($possibleEndDirs as $dir) {
+        foreach (['public', 'pub', 'wp-admin'] as $dir) {
             if (str_ends_with($basePath, $dir . DIRECTORY_SEPARATOR)) {
                 $basePath = substr($basePath, 0, -strlen($dir . DIRECTORY_SEPARATOR));
+
                 break;
             }
         }
