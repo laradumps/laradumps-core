@@ -2,6 +2,7 @@
 
 namespace LaraDumps\LaraDumpsCore;
 
+use Closure;
 use LaraDumps\LaraDumpsCore\Actions\Dumper;
 use LaraDumps\LaraDumpsCore\Actions\{Config, SendPayload, Support};
 use LaraDumps\LaraDumpsCore\Concerns\Colors;
@@ -38,6 +39,8 @@ class LaraDumps
     ];
 
     private bool $dispatched = false;
+
+    public static ?\Closure $beforeSend = null;
 
     public function __construct(
         private string $notificationId = '',
@@ -84,6 +87,10 @@ class LaraDumps
         }
 
         $payload->setNotificationId($this->notificationId);
+
+        if ($closure = static::$beforeSend) {
+            $closure($payload, $withFrame);
+        }
 
         $sendPayload = new SendPayload();
 
@@ -315,5 +322,29 @@ class LaraDumps
         $frame = $frames[array_key_first($frames)] ?? [];
 
         return $frame;
+    }
+
+    public static function beforeSend(?Closure $closure = null): void
+    {
+        static::$beforeSend = $closure;
+    }
+
+    public static function macosAutoLaunch(): void
+    {
+        $closure = function () {
+            $script = '
+                tell application "System Events"
+                    if not (exists (processes whose bundle identifier is "com.laradumps.app")) then
+                        tell application "LaraDumps" to activate
+                        delay 1
+                    end if
+                end tell
+            ';
+
+            $command = "osascript -e " . escapeshellarg($script);
+            shell_exec($command);
+        };
+
+        static::$beforeSend = $closure;
     }
 }

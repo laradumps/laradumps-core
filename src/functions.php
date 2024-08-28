@@ -1,6 +1,7 @@
 <?php
 
 use LaraDumps\LaraDumps\LaraDumps as LaravelLaraDumps;
+use LaraDumps\LaraDumpsCore\Actions\Config;
 use LaraDumps\LaraDumpsCore\LaraDumps;
 
 if (!function_exists('appBasePath')) {
@@ -24,6 +25,10 @@ if (!function_exists('ds')) {
     function ds(mixed ...$args)
     {
         $sendRequest = function ($args, LaraDumps $instance) {
+            if (Config::get('config.macos_auto_launch', false)) {
+                LaraDumps::macosAutoLaunch();
+            }
+
             if ($args) {
                 foreach ($args as $arg) {
                     $instance->write($arg);
@@ -57,6 +62,10 @@ if (!function_exists('phpinfo')) {
 if (!function_exists('dsd')) {
     function dsd(mixed ...$args): void
     {
+        if (Config::get('config.macos_auto_launch', false)) {
+            LaraDumps::macosAutoLaunch();
+        }
+
         $instance = new LaraDumps();
 
         foreach ($args as $arg) {
@@ -70,6 +79,10 @@ if (!function_exists('dsd')) {
 if (!function_exists('dsq')) {
     function dsq(mixed ...$args): void
     {
+        if (Config::get('config.macos_auto_launch', false)) {
+            LaraDumps::macosAutoLaunch();
+        }
+
         $instance = new LaraDumps();
 
         if ($args) {
