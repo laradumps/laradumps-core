@@ -7,6 +7,7 @@ app:
     wsl_config: wsl+Ubuntu/ #wsl+Ubuntu20.04/
 config:
     sleep: 0
+    macos_auto_launch: true
 observers:
     auto_invoke_app: false
     enabled_in_testing: false
