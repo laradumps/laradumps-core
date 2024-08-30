@@ -76,6 +76,10 @@ class LaraDumps
 
     public function send(Payload $payload, bool $withFrame = true): Payload
     {
+        if (Config::get('config.macos_auto_launch', false)) {
+            LaraDumps::macosAutoLaunch();
+        }
+
         if ($withFrame) {
             $backtrace = Backtrace::create();
             $backtrace = $backtrace->applicationPath(appBasePath());
