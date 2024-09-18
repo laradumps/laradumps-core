@@ -65,7 +65,7 @@ trait Colors
 
     public function orange(): LaraDumps
     {
-        return $this->write();
+        return $this->warning();
     }
 
     public function black(): LaraDumps
