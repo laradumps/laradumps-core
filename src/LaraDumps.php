@@ -147,14 +147,35 @@ class LaraDumps
 
     /**
      * Add new screen
+     */
+    public function w(string $screen): LaraDumps
+    {
+        return $this->toScreenWindow($screen);
+    }
+
+    /**
+     * Add new screen
      *
      * @param  int  $raiseIn  Delay in seconds for the app to raise and focus
      */
     public function toScreen(
         string $screenName,
-        int $raiseIn = 0
+        int $raiseIn = 0,
     ): LaraDumps {
-        $payload = new ScreenPayload($screenName, $raiseIn);
+        $payload = new ScreenPayload($screenName, raiseIn: $raiseIn);
+        $this->send($payload);
+
+        return $this;
+    }
+
+    /**
+     * Add new screen window
+     *
+     */
+    public function toScreenWindow(
+        string $screenName
+    ): LaraDumps {
+        $payload = new ScreenPayload($screenName, newWindow: true);
         $this->send($payload);
 
         return $this;
@@ -345,7 +366,7 @@ class LaraDumps
                 end tell
             ';
 
-            $command = "osascript -e " . escapeshellarg($script);
+            $command = 'osascript -e ' . escapeshellarg($script);
             shell_exec($command);
         };
 

@@ -24,7 +24,7 @@ function _table_data(): array
 
 function _table_generator(): iterable
 {
-    yield  from _table_data();
+    yield from _table_data();
 }
 
 function _table_dump(): array
