@@ -11,3 +11,8 @@ config:
 observers:
     auto_invoke_app: false
     enabled_in_testing: false
+xdebug:
+    host: 0.0.0.0
+    port: 9003
+    workdir: /var/www/html/
+    project_path:
