@@ -11,3 +11,6 @@ config:
 observers:
     auto_invoke_app: false
     enabled_in_testing: false
+xdebug:
+    client_host: 0.0.0.0
+    client_port: 9003
