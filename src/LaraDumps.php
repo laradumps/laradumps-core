@@ -55,25 +55,6 @@ class LaraDumps
         $this->notificationId = Uuid::uuid4()->toString();
     }
 
-    protected function beforeWrite(mixed $args): \Closure
-    {
-        return function () use ($args) {
-            if (is_string($args) && Support::isJson($args)) {
-                return [
-                    new JsonPayload($args),
-                    uniqid(),
-                ];
-            }
-
-            [$pre, $id] = Dumper::dump($args);
-
-            return [
-                new DumpPayload($pre, $args, variableType: gettype($args)),
-                $id,
-            ];
-        };
-    }
-
     public function send(Payload $payload, bool $withFrame = true): Payload
     {
         if (Config::get('config.macos_auto_launch', false)) {
@@ -109,7 +90,7 @@ class LaraDumps
         return $payload;
     }
 
-    public function write(mixed $args = null, ?bool $autoInvokeApp = null): self
+    public function write(mixed $args = null, ?bool $autoInvokeApp = null, array $extraContent = []): self
     {
         [$payload, $id] = $this->beforeWrite($args)();
 
@@ -120,6 +101,7 @@ class LaraDumps
         /** @var Payload $payload */
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->setDumpId($id);
+        $payload->setExtraContent($extraContent);
 
         $this->send($payload);
 
@@ -371,5 +353,29 @@ class LaraDumps
         };
 
         static::$beforeSend = $closure;
+    }
+
+    public function extraContent(): array
+    {
+        return [];
+    }
+
+    protected function beforeWrite(mixed $args): \Closure
+    {
+        return function () use ($args) {
+            if (is_string($args) && Support::isJson($args)) {
+                return [
+                    new JsonPayload($args),
+                    uniqid(),
+                ];
+            }
+
+            [$pre, $id] = Dumper::dump($args);
+
+            return [
+                new DumpPayload($pre, $args, variableType: gettype($args)),
+                $id,
+            ];
+        };
     }
 }

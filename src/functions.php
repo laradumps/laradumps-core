@@ -26,7 +26,7 @@ if (!function_exists('ds')) {
         $sendRequest = function ($args, LaraDumps $instance) {
             if ($args) {
                 foreach ($args as $arg) {
-                    $instance->write($arg);
+                    $instance->write($arg, extraContent: $instance->extraContent());
                 }
             }
         };
