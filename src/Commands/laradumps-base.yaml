@@ -8,6 +8,7 @@ app:
 config:
     sleep: 0
     macos_auto_launch: true
+    send_extra_content: true
 observers:
     auto_invoke_app: false
     enabled_in_testing: false

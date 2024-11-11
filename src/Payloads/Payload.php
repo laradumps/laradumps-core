@@ -100,7 +100,7 @@ abstract class Payload
             ],
             $this->type()   => $this->content(),
             'ide_handle'    => $ideHandle,
-            'extra_content' => $this->extraContent,
+            'extra_content' => boolval(Config::get('observers.send_extra_content')) ? $this->extraContent : [],
         ];
     }
 
