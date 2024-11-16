@@ -83,7 +83,7 @@ class LaraDumps
             $backtrace = $backtrace->applicationPath(appBasePath());
             $frame     = $this->parseFrame($backtrace);
 
-            if (! empty($frame)) {
+            if (!empty($frame)) {
                 $payload->setFrame($frame);
             }
         }
@@ -94,7 +94,7 @@ class LaraDumps
             $closure($payload, $withFrame);
         }
 
-        $sendPayload = new SendPayload;
+        $sendPayload = new SendPayload();
 
         $response = $sendPayload->handle(
             $payload->toArray()
@@ -203,7 +203,7 @@ class LaraDumps
      */
     public function clear(): LaraDumps
     {
-        $this->send(new ClearPayload);
+        $this->send(new ClearPayload());
 
         return $this;
     }
@@ -213,7 +213,7 @@ class LaraDumps
      */
     public function coffee(): LaraDumps
     {
-        $this->send(new CoffeePayload);
+        $this->send(new CoffeePayload());
 
         return $this;
     }
@@ -223,7 +223,7 @@ class LaraDumps
      */
     public function isJson(): LaraDumps
     {
-        $payload = new ValidJsonPayload;
+        $payload = new ValidJsonPayload();
 
         $this->send($payload);
 
@@ -254,7 +254,7 @@ class LaraDumps
      */
     public function phpinfo(): LaraDumps
     {
-        $payload = new PhpInfoPayload;
+        $payload = new PhpInfoPayload();
 
         $this->send($payload);
 
@@ -334,7 +334,7 @@ class LaraDumps
                     }
                 }
 
-                if (! $exclude) {
+                if (!$exclude) {
                     $frames[] = $frame;
                 }
             }
@@ -357,7 +357,7 @@ class LaraDumps
             return;
         }
 
-        if (! Config::get('config.macos_auto_launch', false)) {
+        if (!Config::get('config.macos_auto_launch', false)) {
             return;
         }
 
