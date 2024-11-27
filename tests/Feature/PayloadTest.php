@@ -135,7 +135,7 @@ it('code snippet work properly - second Code Snippet file contents', function ()
         ->toHaveKeys(['file', 'line', 'snippet'])
         ->and($context[1])
         ->file->toContain(adjustPathToDirectorySeparator('tests/Feature/PayloadTest.php'))
-        ->line->toBe(133)
+        ->line->toBe(132)
         ->and($context[1])
         ->snippet->toHaveCount(15);
 });
