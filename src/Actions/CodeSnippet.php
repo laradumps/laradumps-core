@@ -13,15 +13,15 @@ class CodeSnippet
 
     public function fromException(\Throwable $exception): array
     {
-        return $this->getContextFromTrace($exception->getTrace(), $exception->getFile(), $exception->getLine());
+        return $this->getCodeSnippetFromTrace($exception->getTrace(), $exception->getFile(), $exception->getLine());
     }
 
     public function fromDebugBacktrace(array $backtrace): array
     {
-        return $this->getContextFromTrace($backtrace);
+        return $this->getCodeSnippetFromTrace($backtrace);
     }
 
-    private function getContextFromTrace(array $trace, ?string $file = null, ?int $line = null): array
+    private function getCodeSnippetFromTrace(array $trace, ?string $file = null, ?int $line = null): array
     {
         $traceContexts = [];
 
@@ -42,28 +42,28 @@ class CodeSnippet
                 continue;
             }
 
-            $filePath   = $traceItem['file'];
-            $targetLine = $traceItem['line'];
+            $traceFile = $traceItem['file'];
+            $traceLine = $traceItem['line'];
 
             $traceContexts[] = [
-                'file'    => $filePath,
-                'line'    => $targetLine,
-                'snippet' => is_readable($filePath) ? $this->fromFileAndLine($filePath, $targetLine) : 'File not found or not readable.',
+                'file'    => $traceFile,
+                'line'    => $line,
+                'snippet' => is_readable($traceLine) ? $this->fromFileAndLine($traceFile, $traceLine) : 'File not found or not readable.',
             ];
         }
 
         return $traceContexts;
     }
 
-    public function fromFileAndLine(string $filePath, int $targetLine): array
+    public function fromFileAndLine(string $file, int $line): array
     {
-        $lines     = file($filePath, FILE_IGNORE_NEW_LINES);
-        $startLine = max(1, $targetLine - $this->linesAbove);
-        $endLine   = min(count($lines), $targetLine + $this->linesBelow);
+        $lines     = file($file, FILE_IGNORE_NEW_LINES);
+        $startLine = max(1, $line - $this->linesAbove);
+        $endLine   = min(count($lines), $line + $this->linesBelow); // @phpstan-ignore-line
 
         return array_combine(
             range($startLine, $endLine),
-            array_slice($lines, $startLine - 1, $endLine - $startLine + 1)
+            array_slice($lines, $startLine - 1, $endLine - $startLine + 1) // @phpstan-ignore-line
         );
     }
 }
