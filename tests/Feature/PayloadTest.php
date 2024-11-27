@@ -125,3 +125,17 @@ it('code snippet work properly - between 10-4', function () {
             20 => '}',
         ]);
 });
+
+it('code snippet work properly - second Code Snippet file contents', function () {
+    $class = new ClassWithException();
+
+    $context = $class->handleCodeSnippet(10, 4);
+
+    expect($context[1])
+        ->toHaveKeys(['file', 'line', 'snippet'])
+        ->and($context[1])
+        ->file->toContain(adjustPathToDirectorySeparator('tests/Feature/PayloadTest.php'))
+        ->line->toBe(133)
+        ->and($context[1])
+        ->snippet->toHaveCount(15);
+});

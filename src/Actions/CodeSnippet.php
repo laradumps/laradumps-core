@@ -47,8 +47,8 @@ class CodeSnippet
 
             $traceContexts[] = [
                 'file'    => $traceFile,
-                'line'    => $line,
-                'snippet' => is_readable($traceLine) ? $this->fromFileAndLine($traceFile, $traceLine) : 'File not found or not readable.',
+                'line'    => $traceLine,
+                'snippet' => is_readable($traceFile) ? $this->fromFileAndLine($traceFile, $traceLine) : 'File not found or not readable.',
             ];
         }
 
