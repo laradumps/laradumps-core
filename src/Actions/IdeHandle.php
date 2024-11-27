@@ -36,7 +36,6 @@ class IdeHandle
         $realPath = $this->frame->file;
         $line     = strval($this->frame->lineNumber);
 
-        /** @var string $realPath */
         $realPath = str_replace(appBasePath() . DIRECTORY_SEPARATOR, '', strval($realPath));
 
         $className = explode(DIRECTORY_SEPARATOR, $realPath);
