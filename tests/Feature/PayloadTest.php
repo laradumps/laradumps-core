@@ -78,7 +78,7 @@ it('code snippet work properly - between 6-6', function () {
     expect($context[0])
         ->toHaveKeys(['file', 'line', 'snippet'])
         ->and($context[0])
-        ->file->toContain('tests/Feature/ClassWithException.php')
+        ->file->toContain(adjustPathToDirectorySeparator('tests/Feature/ClassWithException.php'))
         ->line->toBe(16)
         ->and($context[0])
         ->snippet->toBe([
@@ -104,7 +104,7 @@ it('code snippet work properly - between 10-4', function () {
     expect($context[0])
         ->toHaveKeys(['file', 'line', 'snippet'])
         ->and($context[0])
-        ->file->toContain('tests/Feature/ClassWithException.php')
+        ->file->toContain(adjustPathToDirectorySeparator('tests/Feature/ClassWithException.php'))
         ->line->toBe(16)
         ->and($context[0])
         ->snippet->toBe([
