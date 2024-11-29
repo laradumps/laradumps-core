@@ -1,6 +1,6 @@
 <?php
 
-namespace LaraDumps\LaraDumpsCore\Actions;
+namespace LaraDumps\LaraDumpsCore\Support;
 
 class CodeSnippet
 {
@@ -29,7 +29,8 @@ class CodeSnippet
             $traceContexts[] = [
                 'file'    => $file,
                 'line'    => $line,
-                'snippet' => is_readable($file) ? $this->fromFileAndLine($file, $line) : 'File not found or not readable.',
+                'snippet' => is_readable($file) ? $this->fromFileAndLine($file, $line) : [$line, 'File not found or not readable.'],
+                'route'   => null,
             ];
         }
 
@@ -45,14 +46,34 @@ class CodeSnippet
             $traceFile = $traceItem['file'];
             $traceLine = $traceItem['line'];
 
+            $route = $traceItem['function'];
+
+            if (isset($traceItem['class'])) {
+                $route = $traceItem['class'] . ':' . $traceItem['function'];
+            }
+
             $traceContexts[] = [
                 'file'    => $traceFile,
+                'route'   => $route,
                 'line'    => $traceLine,
-                'snippet' => is_readable($traceFile) ? $this->fromFileAndLine($traceFile, $traceLine) : 'File not found or not readable.',
+                'snippet' => is_readable($traceFile) ? $this->fromFileAndLine($traceFile, $traceLine) : [$line, 'File not found or not readable.'],
             ];
         }
 
-        return $traceContexts;
+        $reorganizedContexts = [];
+
+        $firstItem = $traceContexts[0];
+
+        for ($i = 1; $i < count($traceContexts); $i++) {
+            $firstItem['route']    = $traceContexts[$i]['route'];
+            $reorganizedContexts[] = $firstItem;
+
+            $firstItem = $traceContexts[$i];
+        }
+
+        $reorganizedContexts[] = $firstItem;
+
+        return $reorganizedContexts;
     }
 
     public function fromFileAndLine(string $file, int $line): array

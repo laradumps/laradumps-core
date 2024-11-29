@@ -2,7 +2,7 @@
 
 namespace LaraDumps\LaraDumpsCore\Tests\Feature;
 
-use LaraDumps\LaraDumpsCore\Actions\CodeSnippet;
+use LaraDumps\LaraDumpsCore\Support\CodeSnippet;
 
 class ClassWithException
 {
