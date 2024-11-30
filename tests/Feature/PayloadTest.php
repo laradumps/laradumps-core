@@ -1,45 +1,36 @@
 <?php
 
-use LaraDumps\LaraDumpsCore\Actions\Dumper;
+use LaraDumps\LaraDumpsCore\Actions\{Dumper};
 use LaraDumps\LaraDumpsCore\LaraDumps;
 use LaraDumps\LaraDumpsCore\Payloads\{DumpPayload, TableV2Payload};
-use Ramsey\Uuid\Uuid;
-
-beforeEach(function () {
-    putenv('DS_RUNNING_IN_TESTS=true');
-
-    $this->markTestSkipped();
-});
+use LaraDumps\LaraDumpsCore\Tests\Feature\ClassWithException;
 
 it('should return the correct payload to dump', function () {
-    fixtureEnv('ds_env');
-
     $args = [
         'name' => 'Luan',
     ];
 
-    [$args, $id]    = Dumper::dump($args);
-    $notificationId = Uuid::uuid4()->toString();
+    [$args, $id] = Dumper::dump($args);
 
     $frame = [
         'file' => 'Test',
         'line' => 1,
     ];
 
-    $laradumps = new LaraDumps(notificationId: $notificationId);
+    $laradumps = new LaraDumps();
     $payload   = new DumpPayload($args);
     $payload->setFrame($frame);
 
     $payload = $laradumps->send($payload, withFrame: false)->toArray();
 
     expect($payload)
-        ->id->toBe($notificationId)
+        ->id->toBeUuid()
         ->type->toBe('dump')
-        ->ide_handle->toMatchArray([
-            'handler' => 'phpstorm://open?file=Test&line=1',
-            'path'    => 'Test',
-            'line'    => 1,
-        ])
+        ->code_snippet->toBeArray()
+        ->and($payload['ide_handle']['real_path'])
+        ->toBe('Test')
+        ->and($payload['ide_handle']['line'])
+        ->toBe('1')
         ->and($payload['dump']['dump'])
         ->toContain(
             '<span class=sf-dump-key>name</span>',
@@ -62,16 +53,14 @@ it('should return the correct payload to table_v2', function () {
         'line' => 1,
     ];
 
-    $notificationId = Uuid::uuid4()->toString();
-
-    $laradumps = new LaraDumps($notificationId);
+    $laradumps = new LaraDumps();
     $payload   = new TableV2Payload($data);
     $payload->setFrame($frame);
 
     $payload = $laradumps->send($payload)->toArray();
 
     expect($payload)
-        ->id->toBe($notificationId)
+        ->id->toBeUuid()
         ->type->toBe('table_v2')
         ->and($payload['table_v2']['values']['Name'])
         ->toContain('Anand Pilania')
@@ -80,3 +69,73 @@ it('should return the correct payload to table_v2', function () {
         ->and($payload['table_v2']['values']['Stack'][0])
         ->toContain('Laravel');
 })->group('table_v2');
+
+it('code snippet work properly - between 6-6', function () {
+    $class = new ClassWithException();
+
+    $context = $class->handleCodeSnippet(6, 6);
+
+    expect($context[0])
+        ->toHaveKeys(['file', 'line', 'snippet'])
+        ->and($context[0])
+        ->file->toContain(adjustPathToDirectorySeparator('tests/Feature/ClassWithException.php'))
+        ->line->toBe(16)
+        ->and($context[0])
+        ->snippet->toBe([
+            10 => "    {",
+            11 => "        \$this->handleCodeSnippet();",
+            12 => "    }",
+            13 => "",
+            14 => '    public function handleCodeSnippet(int $linesAbove = 6, int $linesBelow = 6)',
+            15 => "    {",
+            16 => "        \$exception = new \Exception('Error!');",
+            17 => "",
+            18 => '        return (new CodeSnippet($linesAbove, $linesBelow))->fromException($exception);',
+            19 => "    }",
+            20 => "}",
+        ]);
+});
+
+it('code snippet work properly - between 10-4', function () {
+    $class = new ClassWithException();
+
+    $context = $class->handleCodeSnippet(10, 4);
+
+    expect($context[0])
+        ->toHaveKeys(['file', 'line', 'snippet'])
+        ->and($context[0])
+        ->file->toContain(adjustPathToDirectorySeparator('tests/Feature/ClassWithException.php'))
+        ->line->toBe(16)
+        ->and($context[0])
+        ->snippet->toBe([
+            6  => '',
+            7  => 'class ClassWithException',
+            8  => '{',
+            9  => '    public function __construct()',
+            10 => '    {',
+            11 => '        $this->handleCodeSnippet();',
+            12 => '    }',
+            13 => '',
+            14 => '    public function handleCodeSnippet(int $linesAbove = 6, int $linesBelow = 6)',
+            15 => '    {',
+            16 => '        $exception = new \Exception(\'Error!\');',
+            17 => '',
+            18 => '        return (new CodeSnippet($linesAbove, $linesBelow))->fromException($exception);',
+            19 => '    }',
+            20 => '}',
+        ]);
+});
+
+it('code snippet work properly - second Code Snippet file contents', function () {
+    $class = new ClassWithException();
+
+    $context = $class->handleCodeSnippet(10, 4);
+
+    expect($context[1])
+        ->toHaveKeys(['file', 'line', 'snippet'])
+        ->and($context[1])
+        ->file->toContain(adjustPathToDirectorySeparator('tests/Feature/PayloadTest.php'))
+        ->line->toBe(132)
+        ->and($context[1])
+        ->snippet->toHaveCount(15);
+});

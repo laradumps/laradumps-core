@@ -17,6 +17,8 @@ abstract class Payload
 
     private ?Frame $frame = null;
 
+    private array $codeSnippet = [];
+
     abstract public function type(): string;
 
     public function setDispatch(bool $dispatched): void
@@ -24,7 +26,12 @@ abstract class Payload
         $this->dispatched = $dispatched;
     }
 
-    public function setFrame(array | Frame $frame): void
+    public function setCodeSnippet(array $codeSnippet): void
+    {
+        $this->codeSnippet = $codeSnippet;
+    }
+
+    public function setFrame(array|Frame $frame): void
     {
         if (is_array($frame)) {
             $this->frame = new Frame(
@@ -91,8 +98,9 @@ abstract class Payload
                 'laradumps_version' => $this->getInstalledVersion(),
                 'auto_invoke_app'   => $this->autoInvokeApp ?? boolval(Config::get('observers.auto_invoke_app')),
             ],
-            $this->type() => $this->content(),
-            'ide_handle'  => $ideHandle,
+            $this->type()  => $this->content(),
+            'ide_handle'   => $ideHandle,
+            'code_snippet' => $this->codeSnippet,
         ];
     }
 
