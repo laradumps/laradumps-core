@@ -6,5 +6,4 @@ parameters:
     checkGenericClassInNonGenericObjectType: false
 
     ignoreErrors:
-        - '#Function [a-zA-Z0-9\\:()]+ has no return type specified.#'
         - '~^Parameter #2 \$string of function explode expects string, mixed given\.$~'
