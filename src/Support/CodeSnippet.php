@@ -2,13 +2,17 @@
 
 namespace LaraDumps\LaraDumpsCore\Support;
 
+use LaraDumps\LaraDumpsCore\Actions\Config;
+
 class CodeSnippet
 {
     public function __construct(
-        public int $linesAbove = 10,
-        public int $linesBelow = 3,
+        public ?int $linesAbove = null,
+        public ?int $linesBelow = null,
         public ?int $traceLimit = null
     ) {
+        $this->linesAbove ??= Config::get('code_snippet.above', 7); //@phpstan-ignore-line
+        $this->linesBelow ??= Config::get('code_snippet.below', 3); //@phpstan-ignore-line
     }
 
     public function fromException(\Throwable $exception): array
