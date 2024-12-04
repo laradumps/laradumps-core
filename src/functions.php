@@ -21,7 +21,7 @@ if (!function_exists('appBasePath')) {
 }
 
 if (!function_exists('ds')) {
-    function ds(mixed ...$args)
+    function ds(mixed ...$args): LaraDumps|LaravelLaraDumps
     {
         $sendRequest = function ($args, LaraDumps $instance) {
             if ($args) {
