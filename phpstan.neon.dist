@@ -2,9 +2,15 @@ parameters:
     paths:
         - src
     level: max
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
 
     ignoreErrors:
-        - '#Function [a-zA-Z0-9\\:()]+ has no return type specified.#'
+        - identifier: missingType.iterableValue
         - '~^Parameter #2 \$string of function explode expects string, mixed given\.$~'
+        -
+            message: "#^Function ds\\(\\) has invalid return type LaraDumps\\\\LaraDumps\\\\LaraDumps\\.$#"
+            count: 1
+            path: src/functions.php
+        -
+            message: "#^Call to method phpinfo\\(\\) on an unknown class LaraDumps\\\\LaraDumps\\\\LaraDumps\\.$#"
+            count: 1
+            path: src/functions.php
