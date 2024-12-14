@@ -82,13 +82,23 @@ class CodeSnippet
 
     public function fromFileAndLine(string $file, int $line): array
     {
-        $lines     = file($file, FILE_IGNORE_NEW_LINES);
+        $lines = file($file, FILE_IGNORE_NEW_LINES);
+
+        if ($lines === false || empty($lines)) {
+            return [];
+        }
+
         $startLine = max(1, $line - $this->linesAbove);
         $endLine   = min(count($lines), $line + $this->linesBelow); // @phpstan-ignore-line
 
-        return array_combine(
-            range($startLine, $endLine),
-            array_slice($lines, $startLine - 1, $endLine - $startLine + 1) // @phpstan-ignore-line
-        );
+        $extractedLines = array_slice($lines, $startLine - 1, $endLine - $startLine + 1);
+
+        $keys = range($startLine, $endLine);
+
+        if (count($keys) !== count($extractedLines)) {
+            return [];
+        }
+
+        return array_combine($keys, $extractedLines);
     }
 }
