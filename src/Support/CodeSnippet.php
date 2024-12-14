@@ -89,7 +89,7 @@ class CodeSnippet
         }
 
         $startLine = max(1, $line - $this->linesAbove);
-        $endLine   = min(count($lines), $line + $this->linesBelow); // @phpstan-ignore-line
+        $endLine   = min(count($lines), $line + $this->linesBelow);
 
         $extractedLines = array_slice($lines, $startLine - 1, $endLine - $startLine + 1);
 
