@@ -8,7 +8,7 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 
 class Dumper
 {
-    public static function dump(mixed $arguments, int $maxDepth = null): array
+    public static function dump(mixed $arguments, ?int $maxDepth = null): array
     {
         $id = Uuid::uuid4()->toString();
 
