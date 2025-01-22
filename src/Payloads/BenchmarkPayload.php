@@ -22,7 +22,7 @@ class BenchmarkPayload extends Payload
         $fastestLabel = '';
         $fastestTime  = PHP_INT_MAX;
 
-        /** @var array  $closures */
+        /** @var array $closures */
         $closures = $this->args;
 
         if (count($closures) === 1 && is_array($closures[0])) {
@@ -58,9 +58,16 @@ class BenchmarkPayload extends Payload
 
         $results['Fastest'] = $fastestLabel;
 
-        return [
-            'label'  => 'Benchmark',
-            'values' => array_map(fn ($result) => Dumper::dump($result), $results),
-        ];
+        return array_map(fn ($result) => Dumper::dump($result), $results);
+    }
+
+    public function screen(): Screen
+    {
+        return new Screen('screen 1');
+    }
+
+    public function label(): Label
+    {
+        return new Label('Benchmark');
     }
 }

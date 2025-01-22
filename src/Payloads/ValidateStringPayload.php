@@ -45,10 +45,20 @@ class ValidateStringPayload extends Payload
         return $this;
     }
 
-    public function SetWholeWord(bool $wholeWord = true): self
+    public function setWholeWord(bool $wholeWord = true): self
     {
         $this->wholeWord = $wholeWord;
 
         return $this;
+    }
+
+    public function screen(): array|Screen
+    {
+        return [];
+    }
+
+    public function label(): array|Label
+    {
+        return [];
     }
 }

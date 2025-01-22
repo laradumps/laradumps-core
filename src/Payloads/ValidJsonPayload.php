@@ -8,4 +8,19 @@ class ValidJsonPayload extends Payload
     {
         return 'json_validate';
     }
+
+    public function screen(): array|Screen
+    {
+        return [];
+    }
+
+    public function label(): array|Label
+    {
+        return [];
+    }
+
+    public function content(): array
+    {
+        return [];
+    }
 }

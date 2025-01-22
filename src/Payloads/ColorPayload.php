@@ -21,4 +21,14 @@ class ColorPayload extends Payload
             'color' => $this->color,
         ];
     }
+
+    public function screen(): array|Screen
+    {
+        return [];
+    }
+
+    public function label(): array|Label
+    {
+        return[];
+    }
 }

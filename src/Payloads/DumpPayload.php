@@ -24,4 +24,14 @@ class DumpPayload extends Payload
             'variable_type'    => $this->variableType,
         ];
     }
+
+    public function screen(): array|Screen
+    {
+        return new Screen('screen 1');
+    }
+
+    public function label(): array|Label
+    {
+        return new Label();
+    }
 }

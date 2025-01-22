@@ -14,4 +14,14 @@ class ClearPayload extends Payload
     {
         return [];
     }
+
+    public function screen(): array|Screen
+    {
+        return [];
+    }
+
+    public function label(): array|Label
+    {
+        return [];
+    }
 }

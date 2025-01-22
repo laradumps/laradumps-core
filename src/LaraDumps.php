@@ -9,7 +9,6 @@ use LaraDumps\LaraDumpsCore\Concerns\Colors;
 use LaraDumps\LaraDumpsCore\Payloads\{
     BenchmarkPayload,
     ClearPayload,
-    CoffeePayload,
     ColorPayload,
     DumpPayload,
     JsonPayload,
@@ -37,8 +36,6 @@ class LaraDumps
         '/laradumps/laradumps/',
         '/laradumps/laradumps-core/',
     ];
-
-    private bool $dispatched = false;
 
     public static ?\Closure $beforeSend = null;
 
@@ -96,13 +93,9 @@ class LaraDumps
 
         $sendPayload = new SendPayload();
 
-        $response = $sendPayload->handle(
+        $sendPayload->handle(
             $payload->toArray()
         );
-
-        if ($response) {
-            $payload->setDispatch(true);
-        }
 
         return $payload;
     }
@@ -209,16 +202,6 @@ class LaraDumps
     }
 
     /**
-     * Grab a coffee!
-     */
-    public function coffee(): LaraDumps
-    {
-        $this->send(new CoffeePayload());
-
-        return $this;
-    }
-
-    /**
      * Send JSON data and validate
      */
     public function isJson(): LaraDumps
@@ -310,11 +293,6 @@ class LaraDumps
         $this->label('Benchmark');
 
         return $this;
-    }
-
-    public function getDispatch(): bool
-    {
-        return $this->dispatched;
     }
 
     public function parseFrame(Backtrace $backtrace): Frame|array

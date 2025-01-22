@@ -24,4 +24,14 @@ class TablePayload extends Payload
     {
         return Table::make($this->data, $this->name);
     }
+
+    public function screen(): array|Screen
+    {
+        return new Screen('screen 1');
+    }
+
+    public function label(): array|Label
+    {
+        return new Label();
+    }
 }

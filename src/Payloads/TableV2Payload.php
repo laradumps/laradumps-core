@@ -30,4 +30,14 @@ class TableV2Payload extends Payload
             'label'       => $this->label,
         ];
     }
+
+    public function screen(): array|Screen
+    {
+        return new Screen('screen 1');
+    }
+
+    public function label(): array|Label
+    {
+        return new Label();
+    }
 }

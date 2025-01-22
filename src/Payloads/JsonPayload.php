@@ -21,4 +21,14 @@ class JsonPayload extends Payload
             'original_content' => $this->string,
         ];
     }
+
+    public function screen(): array|Screen
+    {
+        return new Screen('screen 1');
+    }
+
+    public function label(): array|Label
+    {
+        return[];
+    }
 }

@@ -25,4 +25,14 @@ class ScreenPayload extends Payload
             'new_window'  => $this->newWindow,
         ];
     }
+
+    public function screen(): array|Screen
+    {
+        return [];
+    }
+
+    public function label(): array|Label
+    {
+        return [];
+    }
 }

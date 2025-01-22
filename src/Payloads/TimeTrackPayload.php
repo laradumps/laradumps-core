@@ -5,7 +5,7 @@ namespace LaraDumps\LaraDumpsCore\Payloads;
 class TimeTrackPayload extends Payload
 {
     /**
-     * Clock script executiontime
+     * Clock script execution time
      */
     public function __construct(
         public string $reference,
@@ -24,7 +24,6 @@ class TimeTrackPayload extends Payload
         $content = [
             'tracker_id' => uniqid(),
             'time'       => microtime(true),
-            'label'      => $this->reference,
         ];
 
         if ($this->stop) {
@@ -32,5 +31,15 @@ class TimeTrackPayload extends Payload
         }
 
         return $content;
+    }
+
+    public function screen(): array|Screen
+    {
+        return new Screen('screen 1');
+    }
+
+    public function label(): array|Label
+    {
+        return new Label($this->reference);
     }
 }

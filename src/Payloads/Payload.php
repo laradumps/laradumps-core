@@ -7,8 +7,6 @@ use Spatie\Backtrace\Frame;
 
 abstract class Payload
 {
-    private bool $dispatched = false;
-
     private string $notificationId;
 
     private ?string $dumpId = null;
@@ -21,10 +19,11 @@ abstract class Payload
 
     abstract public function type(): string;
 
-    public function setDispatch(bool $dispatched): void
-    {
-        $this->dispatched = $dispatched;
-    }
+    abstract public function screen(): array|Screen;
+
+    abstract public function label(): array|Label;
+
+    abstract public function content(): array;
 
     public function setCodeSnippet(array $codeSnippet): void
     {
@@ -48,11 +47,6 @@ abstract class Payload
         $this->frame = $frame;
     }
 
-    public function getDispatch(): bool
-    {
-        return $this->dispatched;
-    }
-
     public function setDumpId(string $id): void
     {
         $this->dumpId = $id;
@@ -61,11 +55,6 @@ abstract class Payload
     public function setNotificationId(string $notificationId): void
     {
         $this->notificationId = $notificationId;
-    }
-
-    public function content(): array
-    {
-        return [];
     }
 
     public function ideHandle(): array
@@ -82,8 +71,6 @@ abstract class Payload
 
     public function toArray(): array
     {
-        $ideHandle = $this->ideHandle();
-
         if (!defined('LARADUMPS_REQUEST_ID')) {
             define('LARADUMPS_REQUEST_ID', uniqid());
         }
@@ -94,27 +81,13 @@ abstract class Payload
             'request_id'       => LARADUMPS_REQUEST_ID,
             'sf_dump_id'       => $this->dumpId,
             'type'             => $this->type(),
-            'meta'             => [
-                'laradumps_version' => $this->getInstalledVersion(),
-                'auto_invoke_app'   => $this->autoInvokeApp ?? boolval(Config::get('observers.auto_invoke_app')),
-            ],
-            $this->type()  => $this->content(),
-            'ide_handle'   => $ideHandle,
-            'code_snippet' => $this->codeSnippet,
+            $this->type()      => $this->content(),
+            'ide_handle'       => $this->ideHandle(),
+            'code_snippet'     => $this->codeSnippet,
+            'screen'           => $this->screen(),
+            'label'            => $this->label(),
+            'auto_invoke_app'  => $this->autoInvokeApp ?? boolval(Config::get('observers.auto_invoke_app')),
         ];
-    }
-
-    public function getInstalledVersion(): ?string
-    {
-        if (class_exists(\Composer\InstalledVersions::class)) {
-            try {
-                return \Composer\InstalledVersions::getVersion('laradumps/laradumps-core');
-            } catch (\Exception) {
-                return '0.0.0';
-            }
-        }
-
-        return '0.0.0';
     }
 
     private function applicationPath(): string

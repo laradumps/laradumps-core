@@ -23,4 +23,14 @@ class LabelPayload extends Payload
             'label' => $this->label,
         ];
     }
+
+    public function screen(): array|Screen
+    {
+        return [];
+    }
+
+    public function label(): array|Label
+    {
+        return[];
+    }
 }

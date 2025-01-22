@@ -38,7 +38,16 @@ class PhpInfoPayload extends Payload
                 'Property',
                 'Value',
             ],
-            'label' => 'PHPINFO',
         ];
+    }
+
+    public function screen(): array|Screen
+    {
+        return [];
+    }
+
+    public function label(): array|Label
+    {
+        return new Label('PHPINFO');
     }
 }
