@@ -4,6 +4,11 @@ namespace LaraDumps\LaraDumpsCore\Payloads;
 
 class PhpInfoPayload extends Payload
 {
+    public function __construct(
+
+    ) {
+    }
+
     public function type(): string
     {
         return 'table';

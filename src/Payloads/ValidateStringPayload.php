@@ -11,7 +11,9 @@ class ValidateStringPayload extends Payload
     protected bool $wholeWord = false;
 
     public function __construct(
-        public string $type
+        private string $type,
+        private string $screen = 'screen 1',
+        private string $label = '',
     ) {
     }
 
@@ -54,11 +56,11 @@ class ValidateStringPayload extends Payload
 
     public function screen(): array|Screen
     {
-        return [];
+        return new Screen($this->screen);
     }
 
     public function label(): array|Label
     {
-        return [];
+        return new Label($this->label);
     }
 }

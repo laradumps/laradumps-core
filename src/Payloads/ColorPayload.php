@@ -5,7 +5,9 @@ namespace LaraDumps\LaraDumpsCore\Payloads;
 class ColorPayload extends Payload
 {
     public function __construct(
-        public string $color
+        public string $color,
+        private string $screen = 'screen 1',
+        private string $label = '',
     ) {
     }
 
@@ -24,11 +26,11 @@ class ColorPayload extends Payload
 
     public function screen(): array|Screen
     {
-        return [];
+        return new Screen($this->screen);
     }
 
     public function label(): array|Label
     {
-        return[];
+        return new Label($this->label);
     }
 }

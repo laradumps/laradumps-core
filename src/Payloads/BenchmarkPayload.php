@@ -7,7 +7,9 @@ use LaraDumps\LaraDumpsCore\Actions\Dumper;
 class BenchmarkPayload extends Payload
 {
     public function __construct(
-        private mixed $args
+        private mixed $args,
+        private string $screen = 'screen 1',
+        private string $label = 'Benchmark',
     ) {
     }
 
@@ -63,11 +65,11 @@ class BenchmarkPayload extends Payload
 
     public function screen(): Screen
     {
-        return new Screen('screen 1');
+        return new Screen($this->screen);
     }
 
     public function label(): Label
     {
-        return new Label('Benchmark');
+        return new Label($this->label);
     }
 }

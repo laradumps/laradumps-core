@@ -6,6 +6,8 @@ class JsonPayload extends Payload
 {
     public function __construct(
         public string $string,
+        private string $screen = 'screen 1',
+        private string $label = '',
     ) {
     }
 
@@ -24,11 +26,11 @@ class JsonPayload extends Payload
 
     public function screen(): array|Screen
     {
-        return new Screen('screen 1');
+        return new Screen($this->screen);
     }
 
     public function label(): array|Label
     {
-        return[];
+        return new Label($this->label);
     }
 }

@@ -9,6 +9,8 @@ class TablePayload extends Payload
     public function __construct(
         private iterable|object $data = [],
         private string $name = '',
+        protected string $screen = 'screen 1',
+        protected string $label = 'Table',
     ) {
         if (empty($this->name)) {
             $this->name = 'Table';
@@ -27,11 +29,11 @@ class TablePayload extends Payload
 
     public function screen(): array|Screen
     {
-        return new Screen('screen 1');
+        return new Screen($this->screen);
     }
 
     public function label(): array|Label
     {
-        return new Label();
+        return new Label($this->label);
     }
 }

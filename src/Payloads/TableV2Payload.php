@@ -9,6 +9,7 @@ class TableV2Payload extends Payload
     public function __construct(
         protected array $values,
         protected string $headerStyle = '',
+        protected string $screen = 'screen 1',
         protected string $label = 'Table',
     ) {
     }
@@ -38,6 +39,6 @@ class TableV2Payload extends Payload
 
     public function label(): array|Label
     {
-        return new Label();
+        return new Label($this->label);
     }
 }

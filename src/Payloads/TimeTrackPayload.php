@@ -9,7 +9,8 @@ class TimeTrackPayload extends Payload
      */
     public function __construct(
         public string $reference,
-        public bool $stop = false
+        public bool $stop = false,
+        public string $screen = 'screen 1'
     ) {
     }
 
@@ -35,7 +36,7 @@ class TimeTrackPayload extends Payload
 
     public function screen(): array|Screen
     {
-        return new Screen('screen 1');
+        return new Screen($this->screen);
     }
 
     public function label(): array|Label
