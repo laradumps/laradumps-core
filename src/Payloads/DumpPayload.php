@@ -8,6 +8,8 @@ class DumpPayload extends Payload
         public mixed $dump,
         public mixed $originalContent = null,
         public ?string $variableType = null,
+        private string $screen = 'screen 1',
+        private string $label = '',
     ) {
     }
 
@@ -27,11 +29,11 @@ class DumpPayload extends Payload
 
     public function screen(): array|Screen
     {
-        return new Screen('screen 1');
+        return new Screen($this->screen);
     }
 
     public function label(): array|Label
     {
-        return new Label();
+        return new Label($this->label);
     }
 }
