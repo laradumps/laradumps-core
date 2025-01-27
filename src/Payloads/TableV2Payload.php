@@ -32,12 +32,12 @@ class TableV2Payload extends Payload
         ];
     }
 
-    public function screen(): array|Screen
+    public function toScreen(): array|Screen
     {
         return new Screen('screen 1');
     }
 
-    public function label(): array|Label
+    public function withLabel(): array|Label
     {
         return new Label($this->label);
     }

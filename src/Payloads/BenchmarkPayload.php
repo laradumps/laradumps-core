@@ -63,12 +63,12 @@ class BenchmarkPayload extends Payload
         return array_map(fn ($result) => Dumper::dump($result), $results);
     }
 
-    public function screen(): Screen
+    public function toScreen(): Screen
     {
         return new Screen($this->screen);
     }
 
-    public function label(): Label
+    public function withLabel(): Label
     {
         return new Label($this->label);
     }

@@ -19,9 +19,9 @@ abstract class Payload
 
     abstract public function type(): string;
 
-    abstract public function screen(): array|Screen;
+    abstract public function toScreen(): array|Screen;
 
-    abstract public function label(): array|Label;
+    abstract public function withLabel(): array|Label;
 
     abstract public function content(): array;
 
@@ -84,8 +84,8 @@ abstract class Payload
             $this->type()      => $this->content(),
             'ide_handle'       => $this->ideHandle(),
             'code_snippet'     => $this->codeSnippet,
-            'screen'           => $this->screen(),
-            'label'            => $this->label(),
+            'to_screen'        => $this->toScreen(),
+            'with_label'       => $this->withLabel(),
             'auto_invoke_app'  => $this->autoInvokeApp ?? boolval(Config::get('observers.auto_invoke_app')),
         ];
     }
