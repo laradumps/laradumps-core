@@ -16,19 +16,14 @@ class ScreenPayload extends Payload
         return 'screen';
     }
 
-    /** @return array<string|mixed> */
     public function content(): array
     {
-        return [
-            'screen_name' => $this->name,
-            'raise_in'    => $this->raiseIn,
-            'new_window'  => $this->newWindow,
-        ];
+        return [];
     }
 
     public function toScreen(): array|Screen
     {
-        return [];
+        return new Screen($this->name, $this->raiseIn, $this->newWindow);
     }
 
     public function withLabel(): array|Label

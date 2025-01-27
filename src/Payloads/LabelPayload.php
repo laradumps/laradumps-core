@@ -19,9 +19,7 @@ class LabelPayload extends Payload
 
     public function content(): array
     {
-        return [
-            'label' => $this->label,
-        ];
+        return [];
     }
 
     public function toScreen(): array|Screen
@@ -31,6 +29,6 @@ class LabelPayload extends Payload
 
     public function withLabel(): array|Label
     {
-        return[];
+        return new Label($this->label);
     }
 }
