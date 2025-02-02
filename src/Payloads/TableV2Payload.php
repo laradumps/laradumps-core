@@ -9,7 +9,7 @@ class TableV2Payload extends Payload
     public function __construct(
         protected array $values,
         protected string $headerStyle = '',
-        protected string $screen = 'screen 1',
+        protected string $screen = 'home',
         protected string $label = 'Table',
     ) {
     }
@@ -34,7 +34,7 @@ class TableV2Payload extends Payload
 
     public function toScreen(): array|Screen
     {
-        return new Screen('screen 1');
+        return new Screen('home');
     }
 
     public function withLabel(): array|Label

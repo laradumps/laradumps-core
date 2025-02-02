@@ -8,7 +8,7 @@ class DumpPayload extends Payload
         public mixed $dump,
         public mixed $originalContent = null,
         public ?string $variableType = null,
-        private string $screen = 'screen 1',
+        private string $screen = 'home',
         private string $label = '',
     ) {
     }

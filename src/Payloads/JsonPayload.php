@@ -6,7 +6,7 @@ class JsonPayload extends Payload
 {
     public function __construct(
         public string $string,
-        private string $screen = 'screen 1',
+        private string $screen = 'home',
         private string $label = '',
     ) {
     }

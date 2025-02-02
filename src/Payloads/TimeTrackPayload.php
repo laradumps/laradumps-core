@@ -10,7 +10,7 @@ class TimeTrackPayload extends Payload
     public function __construct(
         public string $reference,
         public bool $stop = false,
-        public string $screen = 'screen 1'
+        public string $screen = 'home'
     ) {
     }
 

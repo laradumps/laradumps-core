@@ -12,7 +12,7 @@ class ValidateStringPayload extends Payload
 
     public function __construct(
         private string $type,
-        private string $screen = 'screen 1',
+        private string $screen = 'home',
         private string $label = '',
     ) {
     }

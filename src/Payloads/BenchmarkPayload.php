@@ -8,7 +8,7 @@ class BenchmarkPayload extends Payload
 {
     public function __construct(
         private mixed $args,
-        private string $screen = 'screen 1',
+        private string $screen = 'home',
         private string $label = 'Benchmark',
     ) {
     }
