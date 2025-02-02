@@ -9,7 +9,7 @@ class TablePayload extends Payload
     public function __construct(
         private iterable|object $data = [],
         private string $name = '',
-        protected string $screen = 'screen 1',
+        protected string $screen = 'home',
         protected string $label = 'Table',
     ) {
         if (empty($this->name)) {
