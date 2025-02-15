@@ -252,7 +252,6 @@ class LaraDumps
         $payload = new TablePayload($data, $name);
 
         $this->send($payload);
-        $this->label('Table');
 
         return $this;
     }
@@ -267,7 +266,6 @@ class LaraDumps
         $payload = new TimeTrackPayload($reference);
 
         $this->send($payload);
-        $this->label($reference);
     }
 
     /**
@@ -290,7 +288,6 @@ class LaraDumps
     {
         $benchmarkPayload = new BenchmarkPayload($args);
         $this->send($benchmarkPayload);
-        $this->label('Benchmark');
 
         return $this;
     }

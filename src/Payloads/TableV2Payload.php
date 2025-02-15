@@ -28,7 +28,6 @@ class TableV2Payload extends Payload
         return [
             'values'      => $values,
             'headerStyle' => $this->headerStyle,
-            'label'       => $this->label,
         ];
     }
 
