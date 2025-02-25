@@ -28,7 +28,7 @@
         "laravel/pint": "^1.13.7",
         "pestphp/pest": "^2.28.1",
         "phpstan/phpstan": "^1.10.50",
-        "illuminate/support": "^11.00"
+        "illuminate/support": "^10.46"
     },
     "autoload": {
         "psr-4": {
