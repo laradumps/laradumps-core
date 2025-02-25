@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update --dev
+          composer install
           composer update --prefer-stable --no-interaction
 
       - name: Code Style 👨‍🏭
