@@ -4,8 +4,8 @@ on: ['push', 'pull_request']
 
 jobs:
   build:
-    fail-fast: false
     runs-on: ${{ matrix.os }}
+    fail-fast: false
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
