@@ -38,7 +38,7 @@ jobs:
 
       - name: Code Style 👨‍🏭
         run: composer test:pint
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.php == '8.3'
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
 

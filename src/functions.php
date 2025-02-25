@@ -6,6 +6,10 @@ use LaraDumps\LaraDumpsCore\LaraDumps;
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
+        if (function_exists('base_path')) {
+            return base_path();
+        }
+
         $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         foreach (['public', 'pub', 'wp-admin'] as $dir) {
@@ -77,24 +81,5 @@ if (!function_exists('dsq')) {
                 $instance->write($arg, autoInvokeApp: false);
             }
         }
-    }
-}
-
-if (!function_exists('runningInTest')) {
-    function runningInTest(): bool
-    {
-        if (PHP_SAPI != 'cli') {
-            return false;
-        }
-
-        if (str_contains($_SERVER['argv'][0], 'phpunit')) {
-            return true;
-        }
-
-        if (str_contains($_SERVER['argv'][0], 'pest')) {
-            return true;
-        }
-
-        return false;
     }
 }

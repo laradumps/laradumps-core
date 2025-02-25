@@ -38,7 +38,7 @@ class Config
 
             foreach ($keys as $key) {
                 if (!isset($content[$key])) {
-                    if (runningInTest() && !$enabledInTesting) {
+                    if (!$enabledInTesting) {
                         return false;
                     }
 
@@ -48,7 +48,7 @@ class Config
                 $content = $content[$key];
             }
 
-            if (runningInTest() && !$enabledInTesting) {
+            if (!$enabledInTesting) {
                 return false;
             }
 
