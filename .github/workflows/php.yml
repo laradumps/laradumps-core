@@ -4,6 +4,7 @@ on: ['push', 'pull_request']
 
 jobs:
   build:
+    fail-fast: false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
