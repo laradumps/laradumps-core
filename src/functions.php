@@ -6,10 +6,6 @@ use LaraDumps\LaraDumpsCore\LaraDumps;
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
-        if (function_exists('base_path')) {
-            return base_path();
-        }
-
         $basePath = rtrim(strval(getcwd()), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         foreach (['public', 'pub', 'wp-admin'] as $dir) {
