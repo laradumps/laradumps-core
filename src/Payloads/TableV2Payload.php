@@ -33,7 +33,7 @@ class TableV2Payload extends Payload
 
     public function toScreen(): array|Screen
     {
-        return new Screen('home');
+        return new Screen($this->screen);
     }
 
     public function withLabel(): array|Label
