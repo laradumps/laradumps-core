@@ -4,8 +4,9 @@ namespace LaraDumps\LaraDumpsCore;
 
 use Closure;
 use LaraDumps\LaraDumpsCore\Actions\Dumper;
-use LaraDumps\LaraDumpsCore\Actions\{Config, SendPayload, Support};
+use LaraDumps\LaraDumpsCore\Actions\{Config, Support};
 use LaraDumps\LaraDumpsCore\Concerns\Colors;
+use LaraDumps\LaraDumpsCore\Dispatcher\Dispatcher;
 use LaraDumps\LaraDumpsCore\Payloads\{
     BenchmarkPayload,
     ClearPayload,
@@ -91,11 +92,7 @@ class LaraDumps
             $closure($payload, $withFrame);
         }
 
-        $sendPayload = new SendPayload();
-
-        $sendPayload->handle(
-            $payload->toArray()
-        );
+        (new Dispatcher())->handle($payload->toArray());
 
         return $payload;
     }
