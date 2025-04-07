@@ -1,4 +1,5 @@
 app:
+    dispatcher: curl
     primary_host: 127.0.0.1
     secondary_host: host.docker.internal
     port: 9191
