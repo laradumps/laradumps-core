@@ -36,7 +36,7 @@ jobs:
           composer update --prefer-stable --no-interaction
 
       - name: Code Style 👨‍🏭
-        run: composer pint
+        run: composer lint
         if: runner.os == 'Linux' && matrix.php == '8.3'
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
