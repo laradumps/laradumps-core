@@ -14,18 +14,18 @@ class ConvertArrayToPhpSyntax
             return self::convertArrayToPhpSyntax($value);
         }
 
-        if (is_null($value) || is_string($value)) {
+        if (is_null($value) || is_string($value) || is_object($value)) {
             return $value;
         }
 
-        if (is_object($value)) {
-            return $value;
+        if (is_array($value)) {
+            return self::convertArrayToPhpSyntax($value);
         }
 
-        return self::convertArrayToPhpSyntax($value);
+        return $value;
     }
 
-    private static function convertArrayToPhpSyntax(array|object $var, int $indentLevel = 0): string
+    private static function convertArrayToPhpSyntax(array $var, int $indentLevel = 0): string
     {
         $indent      = str_repeat('    ', $indentLevel);
         $innerIndent = str_repeat('    ', $indentLevel + 1);
