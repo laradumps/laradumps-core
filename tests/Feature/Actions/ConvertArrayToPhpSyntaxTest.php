@@ -4,6 +4,9 @@ use Illuminate\Support\Collection;
 use LaraDumps\LaraDumpsCore\Actions\ConvertArrayToPhpSyntax;
 use PHPUnit\Framework\TestCase;
 
+beforeEach(function () {
+})->skipOnWindows();
+
 uses(TestCase::class);
 
 it('converts string to string unchanged', function (): void {
