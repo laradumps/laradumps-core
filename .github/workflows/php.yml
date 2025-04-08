@@ -36,14 +36,14 @@ jobs:
           composer update --prefer-stable --no-interaction
 
       - name: Code Style 👨‍🏭
-        run: composer test:pint
+        run: composer pint
         if: runner.os == 'Linux' && matrix.php == '8.3'
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
 
       - name: PHPStan ⚗️
-        run: composer test:types
+        run: composer phpstan
         if: runner.os == 'Linux' && matrix.php == '8.3'
 
       - name: Pest Tests 👨🏻‍🔬
-        run: composer test:tests
+        run: composer test
