@@ -10,12 +10,12 @@ it('converts string to string unchanged', function (): void {
     $input  = 'simple text';
     $output = ConvertArrayToPhpSyntax::convert($input);
 
-    expect($output)->toBe($input);
+    expect($output)->toEqual($input);
 });
 
 it('converts empty array to PHP syntax', function (): void {
     $output = ConvertArrayToPhpSyntax::convert([]);
-    expect($output)->toBe('[
+    expect($output)->toEqual('[
 ]');
 });
 it('converts array to valid PHP syntax', function (): void {
@@ -66,7 +66,7 @@ it('converts nested arrays with numeric keys', function (): void {
 PHP;
 
     $output = ConvertArrayToPhpSyntax::convert($input);
-    expect($output)->toBe($expected);
+    expect($output)->toEqual($expected);
 });
 
 it('converts Laravel Collection to PHP syntax', function (): void {
@@ -85,7 +85,7 @@ it('converts Laravel Collection to PHP syntax', function (): void {
 PHP;
 
     $output = ConvertArrayToPhpSyntax::convert($collection);
-    expect($output)->toBe($expected);
+    expect($output)->toEqual($expected);
 });
 
 it('converts object with toArray method to PHP syntax', function (): void {
@@ -111,7 +111,7 @@ it('converts object with toArray method to PHP syntax', function (): void {
 PHP;
 
     $output = ConvertArrayToPhpSyntax::convert($object);
-    expect($output)->toBe($expected);
+    expect($output)->toEqual($expected);
 });
 
 it('handles objects without toArray method', function (): void {
@@ -122,7 +122,7 @@ it('handles objects without toArray method', function (): void {
 
     $output = ConvertArrayToPhpSyntax::convert($object);
 
-    expect($output)->toBe(<<<'PHP'
+    expect($output)->toEqual(<<<'PHP'
 [
     'foo' => 'bar',
     'nested' => (object) array(
