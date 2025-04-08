@@ -6,14 +6,20 @@ use Carbon\CarbonInterface;
 
 class ConvertArrayToPhpSyntax
 {
-    public static function convert(mixed $value): ?string
+    public static function convert(mixed $value): mixed
     {
-        if (is_string($value) || is_null($value)) {
+        if (is_object($value) && method_exists($value, 'toArray')) {
+            $value = $value->toArray();
+
+            return self::convertArrayToPhpSyntax($value);
+        }
+
+        if (is_null($value) || is_string($value)) {
             return $value;
         }
 
-        if (is_object($value) && method_exists($value, 'toArray')) {
-            $value = $value->toArray();
+        if (is_object($value)) {
+            return $value;
         }
 
         return self::convertArrayToPhpSyntax($value);

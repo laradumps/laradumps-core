@@ -123,16 +123,25 @@ it('handles objects without toArray method', function (): void {
     $object->nested      = new stdClass();
     $object->nested->baz = 'qux';
 
-    $output = ConvertArrayToPhpSyntax::convert($object);
+    $array = [
+        'object' => $object,
+    ];
 
-    expect($output)->toEqual(<<<'PHP'
+    $output = ConvertArrayToPhpSyntax::convert($array);
+
+    $expected = <<<'PHP'
 [
-    'foo' => 'bar',
-    'nested' => (object) array(
-   'baz' => 'qux',
+    'object' => (object) array(
+   'foo' => 'bar',
+   'nested' => 
+  (object) array(
+     'baz' => 'qux',
+  ),
 ),
 ]
-PHP);
+PHP;
+
+    expect($output)->toEqual($expected);
 });
 
 it('handles null values correctly', function (): void {
