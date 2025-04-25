@@ -106,7 +106,7 @@ abstract class Payload
         }
 
         /** @var bool $enabled */
-        $enabled = Config::get('observers.context', true);
+        $enabled = Config::get('extra.context', true);
 
         if (!$enabled) {
             return [];
