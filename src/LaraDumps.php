@@ -3,8 +3,8 @@
 namespace LaraDumps\LaraDumpsCore;
 
 use Closure;
-use LaraDumps\LaraDumpsCore\Actions\Dumper;
 use LaraDumps\LaraDumpsCore\Actions\{Config, Support};
+use LaraDumps\LaraDumpsCore\Actions\Dumper;
 use LaraDumps\LaraDumpsCore\Concerns\Colors;
 use LaraDumps\LaraDumpsCore\Dispatcher\Dispatcher;
 use LaraDumps\LaraDumpsCore\Payloads\{
