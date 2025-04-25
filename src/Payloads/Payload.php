@@ -86,7 +86,7 @@ abstract class Payload
             'code_snippet'     => $this->codeSnippet,
             'to_screen'        => $this->toScreen(),
             'with_label'       => $this->withLabel(),
-            'context'          => $this->getLogContext(),
+            'extra'            => $this->getExtraPayload(),
             'auto_invoke_app'  => $this->autoInvokeApp ?? boolval(Config::get('observers.auto_invoke_app')),
         ];
     }
@@ -99,7 +99,7 @@ abstract class Payload
         return $path;
     }
 
-    private function getLogContext(): array
+    private function getExtraPayload(): array
     {
         if (!class_exists(\Illuminate\Support\Facades\Context::class)) {
             return [];
@@ -109,9 +109,13 @@ abstract class Payload
         $enabled = Config::get('extra.context', true);
 
         if (!$enabled) {
-            return [];
+            return [
+                'context' => [],
+            ];
         }
 
-        return \Illuminate\Support\Facades\Context::all();
+        return [
+            'context' => \Illuminate\Support\Facades\Context::all(),
+        ];
     }
 }
