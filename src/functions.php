@@ -6,14 +6,9 @@ use LaraDumps\LaraDumpsCore\LaraDumps;
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
-        $currentWorkingDirectory = getcwd();
-        if (isset($_SERVER['LARAVEL_OCTANE']) && intval($_SERVER['LARAVEL_OCTANE']) === 1) {
-            // Use base_path to get the actual project path, as octane is running inside its vendor folder.
-            // We can use globally registered laravel functions when octane was detected.
-            $currentWorkingDirectory = base_path();
-        }
+        $pwd = defined('LARAVEL_START') || isset($_SERVER['LARAVEL_OCTANE']) ? app()->basePath() : getcwd();
 
-        $basePath = rtrim(strval($currentWorkingDirectory), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $basePath = rtrim($pwd, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         foreach (['public', 'pub', 'wp-admin'] as $dir) {
             if (str_ends_with($basePath, $dir . DIRECTORY_SEPARATOR)) {
