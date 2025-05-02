@@ -6,7 +6,8 @@ use LaraDumps\LaraDumpsCore\LaraDumps;
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
-        $pwd = defined('LARAVEL_START') || isset($_SERVER['LARAVEL_OCTANE']) ? app()->basePath() : getcwd();
+        $pwd = (defined('LARAVEL_START') || isset($_SERVER['LARAVEL_OCTANE'])) && function_exists('app')
+            ? app()->basePath() : getcwd();
 
         $basePath = rtrim($pwd, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
