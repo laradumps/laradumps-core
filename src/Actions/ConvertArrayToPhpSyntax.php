@@ -46,7 +46,11 @@ class ConvertArrayToPhpSyntax
                     continue;
                 }
 
-                $value = $value->toArray();
+                if ($value instanceof \Illuminate\Http\Resources\Json\AnonymousResourceCollection) { // @phpstan-ignore-line
+                    $value = $value->toArray(request()); // @phpstan-ignore-line
+                } else {
+                    $value = $value->toArray();
+                }
             }
 
             if (is_array($value)) {
