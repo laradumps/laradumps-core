@@ -46,8 +46,8 @@ class ConvertArrayToPhpSyntax
                     continue;
                 }
 
-                if ($value instanceof \Illuminate\Http\Resources\Json\AnonymousResourceCollection) {
-                    $value = $value->toArray(request());
+                if ($value instanceof \Illuminate\Http\Resources\Json\AnonymousResourceCollection) { // @phpstan-ignore-line
+                    $value = $value->toArray(request()); // @phpstan-ignore-line
                 } else {
                     $value = $value->toArray();
                 }
