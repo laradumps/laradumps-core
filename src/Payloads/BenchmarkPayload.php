@@ -60,7 +60,9 @@ class BenchmarkPayload extends Payload
 
         $results['Fastest'] = $fastestLabel;
 
-        return array_map(fn ($result) => Dumper::dump($result), $results);
+        return [
+            'values' => array_map(fn ($result) => Dumper::dump($result), $results),
+        ];
     }
 
     public function toScreen(): Screen
