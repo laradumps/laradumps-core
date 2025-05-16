@@ -31,7 +31,9 @@ class Table
             $value = [];
 
             foreach ($columns as $column) {
-                $value[$column] = (string) $row[$column];
+                $value[$column] = (string) gettype($row[$column]) === 'string'
+                    ? $row[$column]
+                    : json_encode($row[$column]);
             }
 
             $values[] = $value;
