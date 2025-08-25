@@ -37,19 +37,17 @@ class InitCommand extends Command
             filepath: __DIR__ . '/laradumps-base.yaml'
         );
 
+        $output->writeln('');
+
         if (!$publish) {
-            $output->writeln('');
             $output->writeln('  ❌  <error>Failed to publish the configuration file.</error>');
             $output->writeln('');
 
             return Command::FAILURE;
         }
 
-        $output->writeln('');
         $output->writeln('  ✅  <info>LaraDumps has been successfully configured!</info>');
         $output->writeln('');
-
-        ds('Welcome back to the LaraDumps!');
 
         new Process(
             [
