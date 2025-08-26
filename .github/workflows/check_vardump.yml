@@ -2,13 +2,15 @@ name: Var Dump Check
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [ main, dev ]
+    paths-ignore:
+      - '*.md'
 
   pull_request:
     types: [ ready_for_review, synchronize, opened ]
     branches: [ main, dev ]
+    paths-ignore:
+      - '*.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
