@@ -56,6 +56,17 @@ class CheckCommand extends Command
             return Command::FAILURE;
         }
 
+        if ($input->getOption('exactly')) {
+            if (empty($input->getOption('text'))) {
+                $output->writeln(' 👋️ <error>Whoops. Specify the --text option when using the --exactly option</error>');
+                $output->writeln('');
+
+                return Command::FAILURE;
+            }
+
+            $this->defaultTextToSearch = '';
+        }
+
         $output->writeln(' 🔍 <info>LaraDumps is searching for words used in debugging in: ' . $input->getOption('dir') . '</info>');
 
         $dirtyFiles = [];
@@ -84,7 +95,6 @@ class CheckCommand extends Command
 
         $filesToIgnore      = $this->prepareFilesToIgnore($input);
         $textToIgnore       = $this->prepareTextToIgnore($input);
-        $customTextToSearch = $this->prepareCustomTextToSearch($input);
 
         foreach ($finder as $file) {
             if ($dirtyFiles && !in_array($file->getRealPath(), $dirtyFiles)) {
@@ -119,18 +129,6 @@ class CheckCommand extends Command
                         $contains = true;
 
                         break;
-                    }
-                }
-
-                if ($input->getOption('exactly')) {
-                    foreach ($customTextToSearch as $search) {
-                        $search = ltrim($search);
-
-                        if (preg_match("/$search/", $lineContent)) {
-                            $contains = true;
-
-                            break;
-                        }
                     }
                 }
 
@@ -236,14 +234,7 @@ class CheckCommand extends Command
             $search = trim($search);
 
             if (strlen($search) > 0) {
-                // '@ds(', 'ds('
-                $textToSearch[] = '@?' . $search . '\(';
-                // '//ds(', '// ds('
-                $textToSearch[] = '//\s*' . $search . '\(';
-                // '{{--@ds(', '{{-- @ds('
-                $textToSearch[] = '\{\{--\s*@' . $search . '\(';
-                // '->ds('
-                $textToSearch[] = '->' . $search . '\(';
+                $textToSearch[] = '(^|\W)' . $search . '\(';
             }
         }
 
