@@ -81,12 +81,16 @@ class CheckCommand extends Command
 
         $output->writeln('');
 
+        $filesToIgnore      = $this->prepareFilesToIgnore($input);
+        $textToIgnore       = $this->prepareTextToIgnore($input);
+        $customTextToSearch = $this->prepareCustomTextToSearch($input);
+
         foreach ($finder as $file) {
             if ($dirtyFiles && !in_array($file->getRealPath(), $dirtyFiles)) {
                 continue;
             }
 
-            if (in_array($file->getRealPath(), $this->prepareFilesToIgnore($input))) {
+            if (in_array($file->getRealPath(), $filesToIgnore)) {
                 continue;
             }
 
@@ -99,7 +103,7 @@ class CheckCommand extends Command
                 $contains = false;
                 $ignore   = false;
 
-                foreach ($this->prepareTextToIgnore($input) as $text) {
+                foreach ($textToIgnore as $text) {
                     if (strpos(strtolower($lineContent), strtolower($text))) {
                         $ignore = true;
 
@@ -118,7 +122,7 @@ class CheckCommand extends Command
                 }
 
                 if ($input->getOption('exactly')) {
-                    foreach ($this->prepareCustomTextToSearch($input) as $search) {
+                    foreach ($customTextToSearch as $search) {
                         if (strpos($lineContent, ltrim($search))) {
                             $contains = true;
 
