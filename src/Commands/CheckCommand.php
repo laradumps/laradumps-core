@@ -4,6 +4,7 @@ namespace LaraDumps\LaraDumpsCore\Commands;
 
 use Exception;
 use LaraDumps\LaraDumpsCore\Actions\GitDirtyFiles;
+use LaraDumps\LaraDumpsCore\Support\CheckCodeSnippet;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -112,9 +113,9 @@ class CheckCommand extends Command
                 }
 
                 foreach ($this->prepareTextToSearch($input) as $search) {
-                    $search = ' ' . ltrim($search);
+                    $search = ltrim($search);
 
-                    if (strpos($lineContent, $search)) {
+                    if (preg_match("/$search/", $lineContent)) {
                         $contains = true;
 
                         break;
@@ -123,7 +124,9 @@ class CheckCommand extends Command
 
                 if ($input->getOption('exactly')) {
                     foreach ($customTextToSearch as $search) {
-                        if (strpos($lineContent, ltrim($search))) {
+                        $search = ltrim($search);
+
+                        if (preg_match("/$search/", $lineContent)) {
                             $contains = true;
 
                             break;
@@ -132,7 +135,7 @@ class CheckCommand extends Command
                 }
 
                 if ($contains && !$ignore) {
-                    $matches[] = $this->addMatchToDisplay($file, $lineContent, $line);
+                    $matches[] = $this->addMatchToDisplay($file, $line);
 
                     if ($input->getArgument('stop-on-failure')) {
                         break 2;
@@ -233,13 +236,14 @@ class CheckCommand extends Command
             $search = trim($search);
 
             if (strlen($search) > 0) {
-                $textToSearch[] = ' ' . $search;
-                $textToSearch[] = $search;
-                $textToSearch[] = '//' . $search;
-                $textToSearch[] = '->' . $search;
-                $textToSearch[] = $search . '(';
-                $textToSearch[] = '@' . $search;
-                $textToSearch[] = ' @' . $search;
+                // '@ds(', 'ds('
+                $textToSearch[] = '@?' . $search . '\(';
+                // '//ds(', '// ds('
+                $textToSearch[] = '//\s*' . $search . '\(';
+                // '{{--@ds(', '{{-- @ds('
+                $textToSearch[] = '\{\{--\s*@' . $search . '\(';
+                // '->ds('
+                $textToSearch[] = '->' . $search . '\(';
             }
         }
 
@@ -256,13 +260,14 @@ class CheckCommand extends Command
             $search = trim($search);
 
             if (strlen($search) > 0) {
-                $textToSearch[] = ' ' . $search;
-                $textToSearch[] = $search;
-                $textToSearch[] = '//' . $search;
-                $textToSearch[] = '->' . $search;
-                $textToSearch[] = $search . '(';
-                $textToSearch[] = '@' . $search;
-                $textToSearch[] = ' @' . $search;
+                // '@ds(', 'ds('
+                $textToSearch[] = '@?' . $search . '\(';
+                // '//ds(', '// ds('
+                $textToSearch[] = '//\s*' . $search . '\(';
+                // '{{--@ds(', '{{-- @ds('
+                $textToSearch[] = '\{\{--\s*@' . $search . '\(';
+                // '->ds('
+                $textToSearch[] = '->' . $search . '\(';
             }
         }
 
@@ -288,50 +293,28 @@ class CheckCommand extends Command
         return $array;
     }
 
-    private function addMatchToDisplay(\SplFileInfo $file, string $lineContent, int $line): array
+    private function addMatchToDisplay(\SplFileInfo $file, int $line): CheckCodeSnippet
     {
-        /** @var array $fileContents */
-        $fileContents = file($file->getRealPath());
-
-        $partialContent = $fileContents[$line - 2] ?? '';
-        $partialContent .= $fileContents[$line - 1] ?? '';
-
-        $partialContent .= $lineContent;
-        $partialContent .= $fileContents[$line + 1] ?? '';
-
-        $realPath = isset($_ENV['IGNITION_LOCAL_SITES_PATH'])
-            ? $_ENV['IGNITION_LOCAL_SITES_PATH'] . DIRECTORY_SEPARATOR . str_replace(appBasePath(), '', $file->getRealPath())
-            : $file->getRealPath();
-
-        return [
-            'line'     => $line + 1,
-            'file'     => $file->getRealPath(),
-            'realPath' => 'file:///' . $realPath,
-            'content'  => $partialContent,
-        ];
+        return new CheckCodeSnippet($file, $line);
     }
 
-    private function displayCodeBlock(OutputInterface $output, int $iterator, array $content): void
+    private function displayCodeBlock(OutputInterface $output, int $iterator, CheckCodeSnippet $snippet): void
     {
         $output->writeln('');
 
         $output->writeln(
             ' ' . ($iterator + 1)
-            . ' <href=' . $content['realPath'] . '>'
-            . $content['realPath']
+            . ' <href=' . $snippet->realPath . '>'
+            . $snippet->realPath
             . ':'
-            . $content['line']
+            . $snippet->line
             . '</>'
         );
 
-        $line      = $content['line'];
-        $startLine = $line - 2;
-        $content   = $content['content'];
-
         render(<<<HTML
             <div class="space-x-1 mx-2 mb-1">
-                <code line="$line" start-line="$startLine">
-                $content
+                <code line="{$snippet->line}" start-line="{$snippet->startLine}">
+                {$snippet->contents}
                 </code>
             </div>
             HTML);
