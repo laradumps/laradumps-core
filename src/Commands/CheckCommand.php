@@ -241,30 +241,6 @@ class CheckCommand extends Command
         return $textToSearch;
     }
 
-    private function prepareCustomTextToSearch(InputInterface $input): array
-    {
-        $textToSearch = [];
-
-        $checkInFor = explode(',', $input->getOption('text') ?? '');
-
-        foreach ($checkInFor as $search) {
-            $search = trim($search);
-
-            if (strlen($search) > 0) {
-                // '@ds(', 'ds('
-                $textToSearch[] = '@?' . $search . '\(';
-                // '//ds(', '// ds('
-                $textToSearch[] = '//\s*' . $search . '\(';
-                // '{{--@ds(', '{{-- @ds('
-                $textToSearch[] = '\{\{--\s*@' . $search . '\(';
-                // '->ds('
-                $textToSearch[] = '->' . $search . '\(';
-            }
-        }
-
-        return $textToSearch;
-    }
-
     private function prepareTextToIgnore(InputInterface $input): array
     {
         $array = [];
