@@ -22,7 +22,7 @@ use function Termwind\{render, renderUsing};
 )]
 class CheckCommand extends Command
 {
-    private string $defaultTextToSearch = 'ds,dsq,dsd,ds1,ds2,ds3,ds4,ds5';
+    private string $defaultTextToSearch = 'ds[qd12345]?';
 
     private string $defaultTextToIgnore = '@dsAutoClearOnPageReload';
 
@@ -93,8 +93,8 @@ class CheckCommand extends Command
 
         $output->writeln('');
 
-        $filesToIgnore      = $this->prepareFilesToIgnore($input);
-        $textToIgnore       = $this->prepareTextToIgnore($input);
+        $filesToIgnore = $this->prepareFilesToIgnore($input);
+        $textToIgnore  = $this->prepareTextToIgnore($input);
 
         foreach ($finder as $file) {
             if ($dirtyFiles && !in_array($file->getRealPath(), $dirtyFiles)) {
