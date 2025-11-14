@@ -29,6 +29,7 @@ class LaraDumps
     use Colors;
 
     private array $backtraceExcludePaths = [
+        '/vendor/laravel/framework/src/Illuminate/Support/Traits',
         '/vendor/laravel/framework/src/Illuminate/Events',
         '/vendor/laravel/framework/src/Illuminate/Database',
         '/artisan',
