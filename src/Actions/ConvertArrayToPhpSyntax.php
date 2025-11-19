@@ -62,8 +62,10 @@ class ConvertArrayToPhpSyntax
             if (is_array($value)) {
                 $result .= self::convertArrayToPhpSyntax($value, $indentLevel + 1);
             } elseif ($value instanceof DateTimeInterface) {
-                $utcDate = (clone $value)->setTimezone(new DateTimeZone('UTC'));
-                $result .= var_export($utcDate->format(DateTimeInterface::ATOM), true);
+                $immutable = \DateTimeImmutable::createFromInterface($value)
+                    ->setTimezone(new DateTimeZone('UTC'));
+
+                $result .= var_export($immutable->format(DateTimeInterface::ATOM), true);
             } elseif (is_resource($value)) {
                 $result .= '(resource)';
             } elseif (is_string($value)) {
