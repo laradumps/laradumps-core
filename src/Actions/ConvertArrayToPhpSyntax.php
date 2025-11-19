@@ -3,6 +3,8 @@
 namespace LaraDumps\LaraDumpsCore\Actions;
 
 use Carbon\CarbonInterface;
+use DateTimeInterface;
+use DateTimeZone;
 
 class ConvertArrayToPhpSyntax
 {
@@ -14,7 +16,11 @@ class ConvertArrayToPhpSyntax
             return self::convertArrayToPhpSyntax($value);
         }
 
-        if (is_null($value) || is_string($value) || is_object($value)) {
+        if (
+            is_null($value)
+            || is_string($value)
+            || (is_object($value) && !$value instanceof DateTimeInterface)
+        ) {
             return $value;
         }
 
@@ -32,7 +38,6 @@ class ConvertArrayToPhpSyntax
 
         $result = "[\n";
 
-        /** @var iterable $var */
         foreach ($var as $key => $value) {
             $result .= $innerIndent;
             $result .= is_int($key) ? $key : var_export($key, true);
@@ -40,7 +45,8 @@ class ConvertArrayToPhpSyntax
 
             if (is_object($value) && method_exists($value, 'toArray')) {
                 if ($value instanceof CarbonInterface) {
-                    $result .= var_export($value->toIso8601String(), true);
+                    $utcCarbon = $value->copy()->setTimezone(new DateTimeZone('UTC'));
+                    $result .= var_export($utcCarbon->toIso8601String(), true);
                     $result .= ",\n";
 
                     continue;
@@ -55,11 +61,14 @@ class ConvertArrayToPhpSyntax
 
             if (is_array($value)) {
                 $result .= self::convertArrayToPhpSyntax($value, $indentLevel + 1);
-            } elseif ($value instanceof \DateTimeInterface) {
-                $result .= var_export($value->format('c'), true);
+            } elseif ($value instanceof DateTimeInterface) {
+                $utcDate = (clone $value)->setTimezone(new DateTimeZone('UTC'));
+                $result .= var_export($utcDate->format(DateTimeInterface::ATOM), true);
             } elseif (is_resource($value)) {
                 $result .= '(resource)';
-            } elseif (is_string($value) || is_object($value)) {
+            } elseif (is_string($value)) {
+                $result .= var_export($value, true);
+            } elseif (is_object($value)) {
                 $result .= var_export($value, true);
             } elseif (is_bool($value)) {
                 $result .= $value ? 'true' : 'false';
