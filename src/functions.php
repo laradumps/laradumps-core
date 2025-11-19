@@ -7,15 +7,20 @@ if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
         $pwd = (defined('LARAVEL_START') || isset($_SERVER['LARAVEL_OCTANE'])) && function_exists('app')
-            ? app()->basePath() : getcwd();
+            ? app()->basePath()
+            : (getcwd() ?: '');
 
-        $basePath = rtrim($pwd, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if ($pwd === '') {
+            return DIRECTORY_SEPARATOR;
+        }
 
-        foreach (['public', 'pub', 'wp-admin'] as $dir) {
-            if (str_ends_with($basePath, $dir . DIRECTORY_SEPARATOR)) {
-                $basePath = substr($basePath, 0, -strlen($dir . DIRECTORY_SEPARATOR));
+        $basePath = rtrim(realpath($pwd) ?: $pwd, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
-                break;
+        foreach (['public', 'pub', 'wp-admin', 'web'] as $dir) {
+            $suffix = DIRECTORY_SEPARATOR . $dir . DIRECTORY_SEPARATOR;
+
+            if (str_ends_with($basePath, $suffix)) {
+                return substr($basePath, 0, -strlen($suffix));
             }
         }
 
