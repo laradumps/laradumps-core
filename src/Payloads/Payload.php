@@ -104,7 +104,7 @@ abstract class Payload
         if (!class_exists(\Illuminate\Foundation\Application::class)) {
             return [];
         }
-        
+
         if (!class_exists(\Illuminate\Support\Facades\Context::class)) {
             return [];
         }
