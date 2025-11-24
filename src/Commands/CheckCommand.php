@@ -33,6 +33,7 @@ class CheckCommand extends Command
             ->addOption('dir', null, InputArgument::OPTIONAL, 'Directories that will be filtered separated by comma')
             ->addOption('ignore', null, InputArgument::OPTIONAL, 'Directories to be ignored separated by comma')
             ->addOption('text', null, InputArgument::OPTIONAL, 'Texts that will be searched separated by a comma')
+            ->addOption('extension', null, InputArgument::OPTIONAL, 'File extensions that will be searched separated by a comma')
             ->addOption('ignore-files', null, InputArgument::OPTIONAL, 'Files that will be ignored separated by a comma')
             ->addArgument('stop-on-failure', InputArgument::OPTIONAL, 'Stop the search if a match is found')
             ->addOption('exactly', null, InputArgument::OPTIONAL, 'Search for exact occurrences');
@@ -81,13 +82,22 @@ class CheckCommand extends Command
             }
         }
 
+        $extensions = ['php'];
+
+        if (!empty($input->getOption('extension'))) {
+            $extensions = explode(',', $input->getOption('extension'));
+        }
+
         $matches = [];
 
         $finder = (new Finder())->files()
             ->ignoreVCS(true)
             ->exclude('node_modules')
-            ->name('*.php')
             ->in($this->prepareDirectories($input));
+
+        foreach ($extensions as $extension) {
+            $finder->name("*.$extension");
+        }
 
         $progressBar = new ProgressBar($output, count($dirtyFiles) ?: $finder->count());
 

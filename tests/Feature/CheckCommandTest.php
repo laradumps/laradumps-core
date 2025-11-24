@@ -135,3 +135,24 @@ it('checks command with "dd" and "--exactly" works property', function () {
         )
         ->toContain('ERROR - Found 6 errors / 2 files');
 });
+
+it('check command with custom extensions works properly', function () {
+    $commandTester = startCommandApplication([
+        '--dir'          => sprintf('tests%sFixtures', DIRECTORY_SEPARATOR),
+        '--ignore-files' => vsprintf('tests%sFixtures%sds_env, tests%sFixtures%sAnotherFunctionsToCheck.php', [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR]),
+        '--extension'    => 'php,twig',
+    ]);
+
+    $output = $commandTester->getDisplay();
+
+    expect($output)
+        ->toContain('LaraDumps is searching for words used in debugging in: ' . sprintf('tests%sFixtures', DIRECTORY_SEPARATOR))
+        ->and($output)
+        ->not->toContain('Whoops. Specify the folders you need to search in --dir option in the comma separated')
+        ->toContain('1/3')
+        ->toContain(
+            '{{ ds(\'this is a twig function to check!\')',
+            '{{ds(\'this is a twig function to check!\')',
+        )
+        ->toContain('ERROR - Found 7 errors / 3 files');
+});
