@@ -207,7 +207,7 @@ it('handles mixed content', function (): void {
 });
 
 it('handles new DateTimeInterface', function (): void {
-    $dateTime = new DateTime('2023-10-01 12:00:00');
+    $dateTime = new DateTime('2023-10-01 12:00:00', new DateTimeZone('utc'));
 
     $input = [
         'date' => $dateTime,
@@ -219,7 +219,7 @@ it('handles new DateTimeInterface', function (): void {
 });
 
 it('handles new CarbonInterface', function (): void {
-    $carbon = new DateTime('2023-10-01 12:00:00');
+    $carbon = new DateTime('2023-10-01 12:00:00', new DateTimeZone('utc'));
 
     $input = [
         'date' => $carbon,
