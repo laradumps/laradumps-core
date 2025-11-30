@@ -41,9 +41,9 @@ class BenchmarkPayload extends Payload
             $label     = is_int($label) ? 'Closure ' . $label : $label;
 
             /** @var \DateTime $startDateTime */
-            $startDateTime = \DateTime::createFromFormat('U.u', sprintf('%.6f', $startsAt));
+            $startDateTime = \DateTime::createFromFormat('U.u', sprintf('%.6F', $startsAt));
             /** @var \DateTime $endDateTime */
-            $endDateTime = \DateTime::createFromFormat('U.u', sprintf('%.6f', $endsAt));
+            $endDateTime = \DateTime::createFromFormat('U.u', sprintf('%.6F', $endsAt));
 
             $results[$label] = [
                 'Start Time' => $startDateTime->format('Y-m-d H:i:s'),
