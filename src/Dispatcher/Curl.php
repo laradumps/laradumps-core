@@ -61,6 +61,7 @@ class Curl implements PayloadSenderInterface
 
         /** @var string $response */
         $response = curl_exec($ch);
+        curl_close($ch);
 
         if (!$response) {
             return false;
