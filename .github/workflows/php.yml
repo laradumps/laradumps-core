@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        php: [ 8.4, 8.3, 8.2, 8.1 ]
+        php: [ 8.5, 8.4, 8.3, 8.2 ]
 
     name: "PHP: ${{ matrix.php }} / ${{ matrix.os }}"
     steps:
@@ -43,14 +43,14 @@ jobs:
           composer update --prefer-stable --no-interaction
 
       - name: Code Style 👨‍🏭
-        run: composer lint
+        run: composer test:pint
         if: runner.os == 'Linux' && matrix.php == '8.3'
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
 
       - name: PHPStan ⚗️
-        run: composer phpstan
+        run: composer test:types
         if: runner.os == 'Linux' && matrix.php == '8.3'
 
       - name: Pest Tests 👨🏻‍🔬
-        run: composer test
+        run: composer test:sqlite
