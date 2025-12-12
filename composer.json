@@ -15,7 +15,7 @@
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
-        "ramsey/uuid": "^4.7.5",
+        "ramsey/uuid": "^4.9.1",
         "symfony/var-dumper": "^6.4|^7.0|^8.0",
         "symfony/console": "^6.4|^7.0|^8.0",
         "symfony/process": "^6.4|^7.0|^8.0",
@@ -26,7 +26,7 @@
     },
     "require-dev": {
         "laravel/pint": "^1.26.0",
-        "pestphp/pest": "^2.0|^3.0|^4.0",
+        "pestphp/pest": "^3.0|^4.0",
         "phpstan/phpstan": "^1.10.50",
         "illuminate/support": "^10.46"
     },
@@ -44,14 +44,14 @@
         }
     },
     "scripts": {
-        "fix": "./vendor/bin/pint",
-        "lint": "./vendor/bin/pint --test",
-        "phpstan": "./vendor/bin/phpstan analyse --ansi --memory-limit=-1",
-        "test": "./vendor/bin/pest --order-by random",
+        "pint:fix": "./vendor/bin/pint",
+        "test:pint": "./vendor/bin/pint --test",
+        "test:types": "./vendor/bin/phpstan analyse --ansi --memory-limit=-1",
+        "test:sqlite": "./vendor/bin/pest --order-by random",
         "verify": [
-            "@lint",
-            "@phpstan",
-            "@test"
+            "@test:pint",
+            "@test:types",
+            "@test:sqlite"
         ]
     },
     "bin": [
