@@ -16,5 +16,5 @@ xdebug:
     client_host: 0.0.0.0
     client_port: 9003
 code_snippet:
-    above: 9
+    above: 7
     below: 3
