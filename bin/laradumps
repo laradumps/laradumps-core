@@ -11,7 +11,16 @@ use LaraDumps\LaraDumpsCore\Commands\CheckCommand;
 use LaraDumps\LaraDumpsCore\Commands\InitCommand;
 use Symfony\Component\Console\Application;
 
-$application = new Application('LaraDumps Core', 'v2.0.0');
-$application->add(new InitCommand());
-$application->add(new CheckCommand());
+$application = new Application('LaraDumps Core', 'v4.0.0');
+
+if (method_exists($application, 'add')) {
+    // Symfony <7
+    $application->add(new InitCommand());
+    $application->add(new CheckCommand());
+} else {
+    // Symfony >=8
+    $application->addCommand(new InitCommand());
+    $application->addCommand(new CheckCommand());
+}
+
 $application->run();
