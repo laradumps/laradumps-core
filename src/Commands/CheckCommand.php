@@ -46,7 +46,9 @@ class CheckCommand extends Command
     {
         $startTime = microtime(true);
 
-        renderUsing($output);
+        if (function_exists('Termwind\renderUsing')) {
+            renderUsing($output);
+        }
 
         $output->writeln('');
 
@@ -76,7 +78,7 @@ class CheckCommand extends Command
             $dirtyFiles = GitDirtyFiles::run();
 
             if (empty($dirtyFiles)) {
-                $this->displaySuccess('0');
+                $this->displaySuccess($output, '0');
 
                 return Command::SUCCESS;
             }
@@ -163,12 +165,12 @@ class CheckCommand extends Command
         $duration = $this->getDuration($startTime);
 
         if (($total = count($matches)) > 0) {
-            $this->displayErrorFound($total, $matches, $duration);
+            $this->displayErrorFound($output, $total, $matches, $duration);
 
             return Command::FAILURE;
         }
 
-        $this->displaySuccess($duration);
+        $this->displaySuccess($output, $duration);
 
         return Command::SUCCESS;
     }
@@ -288,19 +290,26 @@ class CheckCommand extends Command
             . '</>'
         );
 
-        render(<<<HTML
+        if (function_exists('Termwind\render')) {
+            render(<<<HTML
             <div class="space-x-1 mx-2 mb-1">
                 <code line="{$snippet->line}" start-line="{$snippet->startLine}">
                 {$snippet->contents}
                 </code>
             </div>
             HTML);
+
+            return;
+        }
+
+        $output->writeln($snippet->contents);
     }
 
-    private function displaySuccess(string $duration): void
+    private function displaySuccess(OutputInterface $output, string $duration): void
     {
-        render(
-            <<<HTML
+        if (function_exists('Termwind\render')) {
+            render(
+                <<<HTML
 <div>
     <div class="flex">
         <span class="flex-1 content-repeat-[-] text-gray"></span>
@@ -316,10 +325,16 @@ class CheckCommand extends Command
     <div></div>
 </div>
 HTML
-        );
+            );
+
+            return;
+        }
+
+        $output->writeln('  ✅  <info> SUCCESS </info> - No results found');
+        $output->writeln("  🕗 Duration: $duration");
     }
 
-    private function displayErrorFound(int $total, array $matches, string $duration): void
+    private function displayErrorFound(OutputInterface $output, int $total, array $matches, string $duration): void
     {
         $totalFiles = count(array_unique(array_column($matches, 'realPath')));
 
@@ -328,8 +343,9 @@ HTML
 
         $message = 'Found ' . $total . ' ' . $totalErrorMessage . ' / ' . $totalFiles . ' ' . $totalFileMessage;
 
-        render(
-            <<<HTML
+        if (function_exists('Termwind\render')) {
+            render(
+                <<<HTML
 <div>
     <div class="flex">
         <span class="flex-1 content-repeat-[-] text-gray"></span>
@@ -345,6 +361,12 @@ HTML
     <div></div>
 </div>
 HTML
-        );
+            );
+
+            return;
+        }
+
+        $output->writeln("  ❌  <error> ERROR </error> - $message");
+        $output->writeln("  🕗 Duration: $duration");
     }
 }

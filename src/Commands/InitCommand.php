@@ -16,7 +16,7 @@ use Symfony\Component\Process\Process;
 )]
 class InitCommand extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->addArgument('pwd', InputArgument::OPTIONAL, 'The working directory');
     }
