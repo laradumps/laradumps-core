@@ -17,6 +17,8 @@ abstract class Payload
 
     private array $codeSnippet = [];
 
+    protected mixed $originalContent = null;
+
     abstract public function type(): string;
 
     abstract public function toScreen(): array|Screen;
@@ -57,6 +59,16 @@ abstract class Payload
         $this->notificationId = $notificationId;
     }
 
+    public function setOriginalContent(mixed $originalContent): void
+    {
+        $this->originalContent = $originalContent;
+    }
+
+    public function getOriginalContent(): mixed
+    {
+        return $this->originalContent;
+    }
+
     public function ideHandle(): array
     {
         $ideHandle = new IdeHandle($this->frame);
@@ -75,13 +87,20 @@ abstract class Payload
             define('LARADUMPS_REQUEST_ID', uniqid());
         }
 
+        $content = $this->content();
+
+        // Add original_content to the payload if it's set
+        if ($this->originalContent !== null) {
+            $content['original_content'] = $this->getConvertedOriginalContent();
+        }
+
         return [
             'id'               => $this->notificationId,
             'application_path' => $this->applicationPath(),
             'request_id'       => LARADUMPS_REQUEST_ID,
             'sf_dump_id'       => $this->dumpId,
             'type'             => $this->type(),
-            $this->type()      => $this->content(),
+            $this->type()      => $content,
             'ide_handle'       => $this->ideHandle(),
             'code_snippet'     => $this->codeSnippet,
             'to_screen'        => $this->toScreen(),
@@ -97,6 +116,15 @@ abstract class Payload
         $path = Config::get('app.project_path', '');
 
         return $path;
+    }
+
+    private function getConvertedOriginalContent(): mixed
+    {
+        if ($this->originalContent === null) {
+            return null;
+        }
+
+        return \LaraDumps\LaraDumpsCore\Actions\ConvertArrayToPhpSyntax::convert($this->originalContent);
     }
 
     private function getExtraPayload(): array

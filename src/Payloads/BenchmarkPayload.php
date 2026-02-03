@@ -11,6 +11,7 @@ class BenchmarkPayload extends Payload
         private string $screen = 'home',
         private string $label = 'Benchmark',
     ) {
+        $this->setOriginalContent($this->args);
     }
 
     public function type(): string

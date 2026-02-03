@@ -9,6 +9,7 @@ class ScreenPayload extends Payload
         public int $raiseIn = 0,
         public bool $newWindow = false
     ) {
+        $this->setOriginalContent($this->name);
     }
 
     public function type(): string
