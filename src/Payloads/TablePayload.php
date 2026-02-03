@@ -15,6 +15,8 @@ class TablePayload extends Payload
         if (empty($this->name)) {
             $this->name = 'Table';
         }
+
+        $this->setOriginalContent($this->data);
     }
 
     public function type(): string

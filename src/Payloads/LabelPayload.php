@@ -10,6 +10,7 @@ class LabelPayload extends Payload
     public function __construct(
         public string $label
     ) {
+        $this->setOriginalContent($this->label);
     }
 
     public function type(): string

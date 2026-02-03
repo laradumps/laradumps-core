@@ -13,6 +13,7 @@ class DumpPayload extends Payload
         private string $screen = 'home',
         private string $label = '',
     ) {
+        $this->setOriginalContent($this->originalContent);
     }
 
     public function type(): string

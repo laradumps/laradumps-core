@@ -12,6 +12,7 @@ class TableV2Payload extends Payload
         protected string $screen = 'home',
         protected string $label = 'Table',
     ) {
+        $this->setOriginalContent($this->values);
     }
 
     public function type(): string

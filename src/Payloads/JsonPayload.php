@@ -9,6 +9,7 @@ class JsonPayload extends Payload
         private string $screen = 'home',
         private string $label = '',
     ) {
+        $this->setOriginalContent($this->string);
     }
 
     public function type(): string

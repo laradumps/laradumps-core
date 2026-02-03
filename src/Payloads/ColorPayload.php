@@ -9,6 +9,7 @@ class ColorPayload extends Payload
         private string $screen = 'home',
         private string $label = '',
     ) {
+        $this->setOriginalContent($this->color);
     }
 
     public function type(): string

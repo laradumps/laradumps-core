@@ -12,6 +12,7 @@ class TimeTrackPayload extends Payload
         public bool $stop = false,
         public string $screen = 'home'
     ) {
+        $this->setOriginalContent($this->reference);
     }
 
     public function type(): string

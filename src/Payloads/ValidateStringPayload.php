@@ -15,6 +15,7 @@ class ValidateStringPayload extends Payload
         private string $screen = 'home',
         private string $label = '',
     ) {
+        $this->setOriginalContent($this->type);
     }
 
     public function type(): string
