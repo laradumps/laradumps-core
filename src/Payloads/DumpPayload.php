@@ -2,6 +2,8 @@
 
 namespace LaraDumps\LaraDumpsCore\Payloads;
 
+use LaraDumps\LaraDumpsCore\Actions\ConvertArrayToPhpSyntax;
+
 class DumpPayload extends Payload
 {
     public function __construct(
@@ -22,8 +24,9 @@ class DumpPayload extends Payload
     public function content(): array
     {
         return [
-            'dump'          => $this->dump,
-            'variable_type' => $this->variableType,
+            'dump'             => $this->dump,
+            'original_content' => ConvertArrayToPhpSyntax::convert($this->originalContent),
+            'variable_type'    => $this->variableType,
         ];
     }
 
