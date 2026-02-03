@@ -7,7 +7,13 @@ use Symfony\Component\Console\Tester\CommandTester;
 function startCommandApplication(array $arguments): CommandTester
 {
     $application = new Application();
-    $application->add(new CheckCommand());
+
+    // Support for Symfony <8 (add method) and Symfony >=8 (addCommand method)
+    if (method_exists($application, 'add')) {
+        $application->add(new CheckCommand());
+    } else {
+        $application->addCommand(new CheckCommand());
+    }
 
     $command = $application->find('check');
 
