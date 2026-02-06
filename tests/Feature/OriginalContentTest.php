@@ -189,3 +189,143 @@ describe('setOriginalContent method', function () {
         }
     });
 });
+
+describe('circular references in original_content', function () {
+    it('handles DumpPayload with circular reference objects', function () {
+        $obj       = new \stdClass();
+        $obj->name = 'Test Object';
+        $obj->self = $obj;
+
+        $payload = new DumpPayload(['test' => 'data'], $obj);
+        $payload->setFrame(['file' => 'test.php', 'line' => 1]);
+        $payload->setNotificationId('test-id');
+
+        $arrayPayload = $payload->toArray();
+
+        expect($arrayPayload)->toHaveKey('dump')
+            ->and($arrayPayload['dump'])->toHaveKey('original_content')
+            ->and($arrayPayload['dump']['original_content'])->toBeObject();
+    });
+
+    it('handles TableV2Payload with circular reference objects in data', function () {
+        $obj       = new \stdClass();
+        $obj->id   = 1;
+        $obj->self = $obj;
+
+        $data = [
+            ['name' => 'Item 1', 'object' => $obj],
+            ['name' => 'Item 2', 'object' => $obj],
+        ];
+
+        $payload = new TableV2Payload($data);
+        $payload->setFrame(['file' => 'test.php', 'line' => 1]);
+        $payload->setNotificationId('test-id');
+
+        $arrayPayload = $payload->toArray();
+
+        expect($arrayPayload)->toHaveKey('table_v2');
+    });
+
+    it('handles mutual circular references between objects', function () {
+        $obj1 = new \stdClass();
+        $obj2 = new \stdClass();
+
+        $obj1->name    = 'Object 1';
+        $obj1->partner = $obj2;
+
+        $obj2->name    = 'Object 2';
+        $obj2->partner = $obj1;
+
+        $payload = new DumpPayload(['test' => 'data'], $obj1);
+        $payload->setFrame(['file' => 'test.php', 'line' => 1]);
+        $payload->setNotificationId('test-id');
+
+        $arrayPayload = $payload->toArray();
+
+        expect($arrayPayload)->toHaveKey('dump');
+        expect($arrayPayload['dump'])->toHaveKey('original_content');
+    });
+
+    it('handles objects with toArray method containing circular references', function () {
+        $obj = new class () {
+            public function toArray()
+            {
+                $data         = ['id' => 1];
+                $data['self'] = $this;
+
+                return $data;
+            }
+        };
+
+        $payload = new DumpPayload(['test' => 'data'], $obj);
+        $payload->setFrame(['file' => 'test.php', 'line' => 1]);
+        $payload->setNotificationId('test-id');
+
+        $arrayPayload = $payload->toArray();
+
+        expect($arrayPayload)->toHaveKey('dump');
+    });
+
+    it('payload toArray does not exhaust memory with complex circular structures', function () {
+        $root     = new \stdClass();
+        $root->id = 'root';
+
+        $child1         = new \stdClass();
+        $child1->id     = 'child1';
+        $child1->parent = $root;
+        $child1->self   = $child1;
+
+        $child2          = new \stdClass();
+        $child2->id      = 'child2';
+        $child2->parent  = $root;
+        $child2->sibling = $child1;
+
+        $root->children = [$child1, $child2];
+
+        $payload = new DumpPayload(['root' => $root], $root);
+        $payload->setFrame(['file' => 'test.php', 'line' => 1]);
+        $payload->setNotificationId('test-id');
+
+        $arrayPayload = $payload->toArray();
+
+        expect($arrayPayload)->toBeArray()
+            ->and($arrayPayload)->toHaveKey('dump');
+    });
+
+    it('handles Exception objects which have circular references', function () {
+        try {
+            throw new \Exception('Test exception');
+        } catch (\Exception $e) {
+            $payload = new DumpPayload(['error' => 'occurred'], $e);
+            $payload->setFrame(['file' => 'test.php', 'line' => 1]);
+            $payload->setNotificationId('test-id');
+
+            $arrayPayload = $payload->toArray();
+
+            expect($arrayPayload)->toBeArray()
+                ->and($arrayPayload)->toHaveKey('dump');
+        }
+    });
+
+    it('handles arrays with multiple references to the same object', function () {
+        $shared       = new \stdClass();
+        $shared->name = 'Shared Object';
+
+        $data = [
+            'first'  => $shared,
+            'second' => $shared,
+            'nested' => [
+                'third' => $shared,
+            ],
+        ];
+
+        $payload = new DumpPayload(['test' => 'data'], $data);
+        $payload->setFrame(['file' => 'test.php', 'line' => 1]);
+        $payload->setNotificationId('test-id');
+
+        $arrayPayload = $payload->toArray();
+
+        expect($arrayPayload)->toBeArray()
+            ->and($arrayPayload)->toHaveKey('dump');
+    });
+});
