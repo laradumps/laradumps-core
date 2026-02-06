@@ -5,15 +5,38 @@ namespace LaraDumps\LaraDumpsCore\Actions;
 use Carbon\CarbonInterface;
 use DateTimeInterface;
 use DateTimeZone;
+use WeakMap;
 
 class ConvertArrayToPhpSyntax
 {
+    /**
+     * @var WeakMap<object, true>
+     */
+    private static WeakMap $visitedObjects;
+
     public static function convert(mixed $value): mixed
     {
-        if (is_object($value) && method_exists($value, 'toArray')) {
-            $value = $value->toArray();
+        self::$visitedObjects = new WeakMap();
 
-            return self::convertArrayToPhpSyntax($value);
+        return self::convertValue($value);
+    }
+
+    private static function convertValue(mixed $value): mixed
+    {
+        if (is_object($value) && method_exists($value, 'toArray')) {
+            if (isset(self::$visitedObjects[$value])) {
+                return '(circular reference)';
+            }
+
+            self::$visitedObjects[$value] = true;
+
+            try {
+                $value = $value->toArray();
+
+                return self::convertArrayToPhpSyntax($value);
+            } catch (\Throwable $e) {
+                return '(conversion error)';
+            }
         }
 
         if (
@@ -40,13 +63,22 @@ class ConvertArrayToPhpSyntax
 
         foreach ($var as $key => $value) {
             $result .= $innerIndent;
-            $result .= is_int($key) ? $key : var_export($key, true);
+            $result .= is_int($key) ? $key : self::safeVarExport($key);
             $result .= ' => ';
 
             if (is_object($value) && method_exists($value, 'toArray')) {
+                if (isset(self::$visitedObjects[$value])) {
+                    $result .= self::safeVarExport('(circular reference)');
+                    $result .= ",\n";
+
+                    continue;
+                }
+
+                self::$visitedObjects[$value] = true;
+
                 if ($value instanceof CarbonInterface) {
                     $utcCarbon = $value->copy()->setTimezone(new DateTimeZone('UTC'));
-                    $result .= var_export($utcCarbon->toIso8601String(), true);
+                    $result .= self::safeVarExport($utcCarbon->toIso8601String());
                     $result .= ",\n";
 
                     continue;
@@ -55,7 +87,14 @@ class ConvertArrayToPhpSyntax
                 if ($value instanceof \Illuminate\Http\Resources\Json\AnonymousResourceCollection) { // @phpstan-ignore-line
                     $value = $value->toArray(request()); // @phpstan-ignore-line
                 } else {
-                    $value = $value->toArray();
+                    try {
+                        $value = $value->toArray();
+                    } catch (\Throwable $e) {
+                        $result .= self::safeVarExport('(conversion error)');
+                        $result .= ",\n";
+
+                        continue;
+                    }
                 }
             }
 
@@ -65,13 +104,18 @@ class ConvertArrayToPhpSyntax
                 $immutable = \DateTimeImmutable::createFromInterface($value)
                     ->setTimezone(new DateTimeZone('UTC'));
 
-                $result .= var_export($immutable->format(DateTimeInterface::ATOM), true);
+                $result .= self::safeVarExport($immutable->format(DateTimeInterface::ATOM));
             } elseif (is_resource($value)) {
-                $result .= '(resource)';
+                $result .= "'(resource)'";
             } elseif (is_string($value)) {
-                $result .= var_export($value, true);
+                $result .= self::safeVarExport($value);
             } elseif (is_object($value)) {
-                $result .= var_export($value, true);
+                if (isset(self::$visitedObjects[$value])) {
+                    $result .= self::safeVarExport('(circular reference)');
+                } else {
+                    self::$visitedObjects[$value] = true;
+                    $result .= self::safeVarExport($value);
+                }
             } elseif (is_bool($value)) {
                 $result .= $value ? 'true' : 'false';
             } elseif (is_null($value)) {
@@ -86,5 +130,18 @@ class ConvertArrayToPhpSyntax
         $result .= $indent . ']';
 
         return $result;
+    }
+
+    private static function safeVarExport(mixed $value): string
+    {
+        try {
+            return var_export($value, true);
+        } catch (\Throwable $e) {
+            if (is_object($value)) {
+                return var_export('(circular reference)', true);
+            }
+
+            return var_export('(conversion error)', true);
+        }
     }
 }
