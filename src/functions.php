@@ -20,7 +20,7 @@ if (!function_exists('appBasePath')) {
             $suffix = DIRECTORY_SEPARATOR . $dir . DIRECTORY_SEPARATOR;
 
             if (str_ends_with($basePath, $suffix)) {
-                return substr($basePath, 0, -strlen($suffix));
+                return substr($basePath, 0, -strlen($suffix)) . DIRECTORY_SEPARATOR;
             }
         }
 
