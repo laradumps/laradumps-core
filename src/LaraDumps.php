@@ -314,7 +314,7 @@ class LaraDumps
         }
 
         /** @var Frame $frame */
-        $frame = $frames[array_key_first($frames)] ?? [];
+        $frame = $frames ? $frames[array_key_first($frames)] : [];
 
         return $frame;
     }
