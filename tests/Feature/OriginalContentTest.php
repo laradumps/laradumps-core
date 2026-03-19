@@ -204,7 +204,8 @@ describe('circular references in original_content', function () {
 
         expect($arrayPayload)->toHaveKey('dump')
             ->and($arrayPayload['dump'])->toHaveKey('original_content')
-            ->and($arrayPayload['dump']['original_content'])->toBeObject();
+            ->and($arrayPayload['dump']['original_content'])->toBeString()
+            ->and($arrayPayload['dump']['original_content'])->toContain('(circular reference)');
     });
 
     it('handles TableV2Payload with circular reference objects in data', function () {

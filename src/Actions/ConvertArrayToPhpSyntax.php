@@ -43,12 +43,19 @@ class ConvertArrayToPhpSyntax
             }
         }
 
-        if (
-            is_null($value)
-            || is_string($value)
-            || (is_object($value) && !$value instanceof DateTimeInterface)
-        ) {
+        if (is_null($value) || is_string($value)) {
             return $value;
+        }
+
+        // Convert objects without toArray() method to PHP syntax
+        if (is_object($value) && !$value instanceof DateTimeInterface) {
+            if (isset(self::$visitedObjects[$value])) {
+                return '(circular reference)';
+            }
+
+            self::$visitedObjects[$value] = true;
+
+            return self::convertObjectToPhpSyntax($value);
         }
 
         if (is_array($value)) {
