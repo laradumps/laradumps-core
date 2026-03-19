@@ -67,7 +67,7 @@ class ConvertArrayToPhpSyntax
         $indent      = str_repeat('    ', $indentLevel);
         $innerIndent = str_repeat('    ', $indentLevel + 1);
 
-        $result = "[\n";
+        $result = "[" . PHP_EOL;
 
         $itemCount  = 0;
         $totalItems = count($var);
@@ -75,7 +75,7 @@ class ConvertArrayToPhpSyntax
         foreach ($var as $key => $value) {
             if ($itemCount >= self::MAX_ITEMS_PER_LEVEL) {
                 $remaining = $totalItems - self::MAX_ITEMS_PER_LEVEL;
-                $result .= $innerIndent . "// ... and {$remaining} more items\n";
+                $result .= $innerIndent . "// ... and {$remaining} more items" . PHP_EOL;
 
                 break;
             }
@@ -88,7 +88,7 @@ class ConvertArrayToPhpSyntax
             if (is_object($value) && method_exists($value, 'toArray')) {
                 if (isset(self::$visitedObjects[$value])) {
                     $result .= self::safeVarExport('(circular reference)');
-                    $result .= ",\n";
+                    $result .= "," . PHP_EOL;
 
                     continue;
                 }
@@ -98,7 +98,7 @@ class ConvertArrayToPhpSyntax
                 if ($value instanceof CarbonInterface) {
                     $utcCarbon = $value->copy()->setTimezone(new DateTimeZone('UTC'));
                     $result .= self::safeVarExport($utcCarbon->toIso8601String());
-                    $result .= ",\n";
+                    $result .= "," . PHP_EOL;
 
                     continue;
                 }
@@ -110,7 +110,7 @@ class ConvertArrayToPhpSyntax
                         $value = $value->toArray();
                     } catch (\Throwable $e) {
                         $result .= self::safeVarExport('(conversion error)');
-                        $result .= ",\n";
+                        $result .= "," . PHP_EOL;
 
                         continue;
                     }
@@ -143,7 +143,7 @@ class ConvertArrayToPhpSyntax
                 $result .= $value;
             }
 
-            $result .= ",\n";
+            $result .= "," . PHP_EOL;
         }
 
         $result .= $indent . ']';
@@ -185,7 +185,7 @@ class ConvertArrayToPhpSyntax
         $innerIndent = str_repeat('  ', $indentLevel + 1);
         $closeIndent = str_repeat('  ', $indentLevel);
 
-        $result = "(object) array(\n";
+        $result = "(object) array(" . PHP_EOL;
 
         $properties = get_object_vars($value);
         $itemCount  = 0;
@@ -193,7 +193,7 @@ class ConvertArrayToPhpSyntax
         foreach ($properties as $key => $propValue) {
             if ($itemCount >= self::MAX_ITEMS_PER_LEVEL) {
                 $remaining = count($properties) - self::MAX_ITEMS_PER_LEVEL;
-                $result .= $innerIndent . "// ... and {$remaining} more items\n";
+                $result .= $innerIndent . "// ... and {$remaining} more items" . PHP_EOL;
 
                 break;
             }
@@ -215,7 +215,7 @@ class ConvertArrayToPhpSyntax
                     }
                 } else {
                     self::$visitedObjects[$propValue] = true;
-                    $result .= "\n" . $innerIndent . self::convertObjectToPhpSyntax($propValue, $indentLevel + 1, $depth + 1);
+                    $result .= PHP_EOL . $innerIndent . self::convertObjectToPhpSyntax($propValue, $indentLevel + 1, $depth + 1);
                 }
             } elseif (is_array($propValue)) {
                 $result .= self::convertArrayToPhpSyntax($propValue, $indentLevel + 1, $depth + 1);
@@ -229,7 +229,7 @@ class ConvertArrayToPhpSyntax
                 $result .= $propValue;
             }
 
-            $result .= ",\n";
+            $result .= "," . PHP_EOL;
         }
 
         $result .= $closeIndent . ")";
