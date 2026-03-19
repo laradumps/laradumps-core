@@ -133,7 +133,7 @@ class ConvertArrayToPhpSyntax
                     $result .= self::safeVarExport('(circular reference)');
                 } else {
                     self::$visitedObjects[$value] = true;
-                    $result .= self::safeVarExport($value);
+                    $result .= self::convertObjectToPhpSyntax($value, $indentLevel, $depth);
                 }
             } elseif (is_bool($value)) {
                 $result .= $value ? 'true' : 'false';
@@ -174,5 +174,66 @@ class ConvertArrayToPhpSyntax
         }
 
         return "'(unknown type)'";
+    }
+
+    private static function convertObjectToPhpSyntax(object $value, int $indentLevel = 0, int $depth = 0): string
+    {
+        if ($depth > self::MAX_DEPTH) {
+            return "'(max depth exceeded)'";
+        }
+
+        $innerIndent = str_repeat('  ', $indentLevel + 1);
+        $closeIndent = str_repeat('  ', $indentLevel);
+
+        $result = "(object) array(\n";
+
+        $properties = get_object_vars($value);
+        $itemCount  = 0;
+
+        foreach ($properties as $key => $propValue) {
+            if ($itemCount >= self::MAX_ITEMS_PER_LEVEL) {
+                $remaining = count($properties) - self::MAX_ITEMS_PER_LEVEL;
+                $result .= $innerIndent . "// ... and {$remaining} more items\n";
+
+                break;
+            }
+            $itemCount++;
+
+            $result .= $innerIndent . "'" . addslashes($key) . "' => ";
+
+            if (is_object($propValue)) {
+                if (isset(self::$visitedObjects[$propValue])) {
+                    $result .= self::safeVarExport('(circular reference)');
+                } elseif (method_exists($propValue, 'toArray')) {
+                    self::$visitedObjects[$propValue] = true;
+
+                    try {
+                        $arrayValue = $propValue->toArray();
+                        $result .= self::convertArrayToPhpSyntax($arrayValue, $indentLevel + 1, $depth + 1);
+                    } catch (\Throwable $e) {
+                        $result .= self::safeVarExport('(conversion error)');
+                    }
+                } else {
+                    self::$visitedObjects[$propValue] = true;
+                    $result .= "\n" . $innerIndent . self::convertObjectToPhpSyntax($propValue, $indentLevel + 1, $depth + 1);
+                }
+            } elseif (is_array($propValue)) {
+                $result .= self::convertArrayToPhpSyntax($propValue, $indentLevel + 1, $depth + 1);
+            } elseif (is_string($propValue)) {
+                $result .= self::safeVarExport($propValue);
+            } elseif (is_bool($propValue)) {
+                $result .= $propValue ? 'true' : 'false';
+            } elseif (is_null($propValue)) {
+                $result .= 'null';
+            } else {
+                $result .= $propValue;
+            }
+
+            $result .= ",\n";
+        }
+
+        $result .= $closeIndent . ")";
+
+        return $result;
     }
 }

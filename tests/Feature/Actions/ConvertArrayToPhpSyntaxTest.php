@@ -128,7 +128,13 @@ it('handles objects without toArray method', function (): void {
 
     $expected = <<<'PHP'
 [
-    'object' => 'stdClass',
+    'object' => (object) array(
+  'foo' => 'bar',
+  'nested' => 
+  (object) array(
+    'baz' => 'qux',
+  ),
+),
 ]
 PHP;
 
