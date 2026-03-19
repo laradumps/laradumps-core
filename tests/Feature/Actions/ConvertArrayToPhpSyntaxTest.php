@@ -316,8 +316,8 @@ it('handles empty nested structures', function (): void {
 
     $output = ConvertArrayToPhpSyntax::convert($input);
 
-    expect($output)->toContain("'empty_array' => [\n    ]")
-        ->and($output)->toContain("'also_empty' => [\n        ]");
+    expect($output)->toContain("'empty_array' => [" . PHP_EOL . "    ]")
+        ->and($output)->toContain("'also_empty' => [" . PHP_EOL . "        ]");
 });
 
 it('handles string keys with special characters', function (): void {
