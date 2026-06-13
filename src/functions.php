@@ -1,6 +1,7 @@
 <?php
 
 use LaraDumps\LaraDumps\LaraDumps as LaravelLaraDumps;
+use LaraDumps\LaraDumpsCore\Actions\{Config, VariableParser};
 use LaraDumps\LaraDumpsCore\LaraDumps;
 
 if (!function_exists('appBasePath')) {
@@ -31,11 +32,24 @@ if (!function_exists('appBasePath')) {
 if (!function_exists('ds')) {
     function ds(mixed ...$args): LaraDumps|LaravelLaraDumps
     {
-        $sendRequest = function ($args, LaraDumps $instance) {
-            if ($args) {
-                foreach ($args as $arg) {
-                    $instance->write($arg);
-                }
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+
+        $sendRequest = function ($args, LaraDumps $instance) use ($trace) {
+            if (!$args) {
+                return;
+            }
+
+            if (Config::get('config.grouped_dumps', false) && count($args) > 1) {
+                $instance->writeGrouped($args, $trace['file'], $trace['line']);
+
+                return;
+            }
+
+            $varInfos = VariableParser::parse($trace['file'], $trace['line'], count($args));
+
+            foreach ($args as $i => $arg) {
+                $varName = $varInfos[$i]['name'] ?? null;
+                $instance->write($arg, variableName: $varName);
             }
         };
 
@@ -65,10 +79,17 @@ if (!function_exists('phpinfo')) {
 if (!function_exists('dsd')) {
     function dsd(mixed ...$args): void
     {
+        $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
         $instance = new LaraDumps();
 
-        foreach ($args as $arg) {
-            $instance->write($arg);
+        if (Config::get('config.grouped_dumps', false) && count($args) > 1) {
+            $instance->writeGrouped($args, $trace['file'], $trace['line']);
+        } else {
+            $varInfos = VariableParser::parse($trace['file'], $trace['line'], count($args));
+
+            foreach ($args as $i => $arg) {
+                $instance->write($arg, variableName: $varInfos[$i]['name'] ?? null);
+            }
         }
 
         die();
@@ -78,12 +99,23 @@ if (!function_exists('dsd')) {
 if (!function_exists('dsq')) {
     function dsq(mixed ...$args): void
     {
+        $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
         $instance = new LaraDumps();
 
-        if ($args) {
-            foreach ($args as $arg) {
-                $instance->write($arg, autoInvokeApp: false);
-            }
+        if (!$args) {
+            return;
+        }
+
+        if (Config::get('config.grouped_dumps', false) && count($args) > 1) {
+            $instance->writeGrouped($args, $trace['file'], $trace['line']);
+
+            return;
+        }
+
+        $varInfos = VariableParser::parse($trace['file'], $trace['line'], count($args));
+
+        foreach ($args as $i => $arg) {
+            $instance->write($arg, autoInvokeApp: false, variableName: $varInfos[$i]['name'] ?? null);
         }
     }
 }
