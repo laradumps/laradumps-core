@@ -14,8 +14,47 @@ class Config
     private static function init(): void
     {
         if (!isset(self::$configFilePath)) {
-            self::$configFilePath = appBasePath() . 'laradumps.yaml';
+            self::$configFilePath = self::locateConfigFile();
         }
+    }
+
+    /**
+     * Locate the laradumps.yaml config file by walking up the directory tree
+     * from the current working directory — the same strategy spatie/ray uses
+     * to find ray.php. This keeps config discovery independent of the entry
+     * point, so it also works with CMS that serve requests from a nested
+     * document root (e.g. TYPO3's public/typo3/ backend, where the working
+     * directory is below the project root and stripping a single known suffix
+     * is not enough).
+     *
+     * Falls back to the conventional location next to the document root when
+     * no config file exists yet, e.g. when `laradumps init` first creates it.
+     */
+    private static function locateConfigFile(): string
+    {
+        $directory = getcwd();
+
+        if ($directory !== false) {
+            $directory = rtrim(realpath($directory) ?: $directory, DIRECTORY_SEPARATOR);
+
+            while (@is_dir($directory)) {
+                $candidate = $directory . DIRECTORY_SEPARATOR . 'laradumps.yaml';
+
+                if (file_exists($candidate)) {
+                    return $candidate;
+                }
+
+                $parent = dirname($directory);
+
+                if ($parent === $directory) {
+                    break;
+                }
+
+                $directory = $parent;
+            }
+        }
+
+        return appBasePath() . 'laradumps.yaml';
     }
 
     private static function loadConfig(): array
