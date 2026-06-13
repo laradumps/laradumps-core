@@ -32,6 +32,13 @@ describe('Dumper::dump()', function () {
         expect($value)->toBeNull();
     });
 
+    it('converts empty string to &nbsp; space', function () {
+        [$value, $id] = Dumper::dump('');
+
+        expect($value)->toBe('&nbsp; ')
+            ->and($id)->toBeString()->not->toBeEmpty();
+    });
+
     it('returns sf-dump HTML for arrays', function () {
         [$html, $id] = Dumper::dump(['key' => 'value']);
 
@@ -93,5 +100,16 @@ describe('Dumper::dump() with forceCloner', function () {
         [, $id2] = Dumper::dump('b', forceCloner: true);
 
         expect($id1)->not->toBe($id2);
+    });
+});
+
+describe('Dumper::dump() with maxDepth', function () {
+    it('respects maxDepth setting', function () {
+        $nested = ['level1' => ['level2' => ['level3' => 'deep']]];
+
+        [$html, $id] = Dumper::dump($nested, maxDepth: 1);
+
+        expect($html)->toContain('sf-dump')
+            ->and($id)->toBeString()->not->toBeEmpty();
     });
 });

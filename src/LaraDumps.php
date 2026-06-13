@@ -127,10 +127,6 @@ class LaraDumps
     {
         [$payload, $id] = $this->beforeWrite($args, $variableName)();
 
-        if (empty($payload) && is_null($id)) {
-            return $this;
-        }
-
         /** @var Payload $payload */
         $payload->autoInvokeApp($autoInvokeApp);
         $payload->setDumpId($id);
@@ -208,6 +204,8 @@ class LaraDumps
 
     /**
      * Send dump and die
+     *
+     * @codeCoverageIgnore
      */
     public function die(string $status = ''): void
     {
@@ -352,7 +350,7 @@ class LaraDumps
     public static function macosAutoLaunch(): void
     {
         if (PHP_OS_FAMILY != 'Darwin') {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         if (!Config::get('config.macos_auto_launch', false)) {

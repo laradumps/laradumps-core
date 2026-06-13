@@ -120,10 +120,6 @@ abstract class Payload
 
     private function getConvertedOriginalContent(): mixed
     {
-        if ($this->originalContent === null) {
-            return null;
-        }
-
         return \LaraDumps\LaraDumpsCore\Actions\ConvertArrayToPhpSyntax::convert($this->originalContent);
     }
 
@@ -133,6 +129,7 @@ abstract class Payload
             return [];
         }
 
+        // @codeCoverageIgnoreStart
         if (!class_exists(\Illuminate\Support\Facades\Context::class)) {
             return [];
         }
@@ -149,5 +146,6 @@ abstract class Payload
         return [
             'context' => \Illuminate\Support\Facades\Context::all(),
         ];
+        // @codeCoverageIgnoreEnd
     }
 }

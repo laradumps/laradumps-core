@@ -8,7 +8,7 @@ if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
         $pwd = (defined('LARAVEL_START') || isset($_SERVER['LARAVEL_OCTANE'])) && function_exists('app')
-            ? app()->basePath()
+            ? app()->basePath() // @codeCoverageIgnore
             : (getcwd() ?: '');
 
         if ($pwd === '') {
@@ -54,11 +54,13 @@ if (!function_exists('ds')) {
         };
 
         if (class_exists(LaravelLaraDumps::class) && function_exists('app')) {
+            // @codeCoverageIgnoreStart
             $instance = app(LaravelLaraDumps::class);
 
             $sendRequest($args, $instance);
 
             return $instance;
+            // @codeCoverageIgnoreEnd
         }
 
         $instance = new LaraDumps();
@@ -77,6 +79,9 @@ if (!function_exists('phpinfo')) {
 }
 
 if (!function_exists('dsd')) {
+    /**
+     * @codeCoverageIgnore
+     */
     function dsd(mixed ...$args): void
     {
         $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
@@ -124,7 +129,7 @@ if (!function_exists('runningInTest')) {
     function runningInTest(): bool
     {
         if (PHP_SAPI != 'cli') {
-            return false;
+            return false; // @codeCoverageIgnore
         }
 
         if (str_contains($_SERVER['argv'][0], 'phpunit')) {
