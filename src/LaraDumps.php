@@ -59,7 +59,7 @@ class LaraDumps
 
     protected function beforeWrite(mixed $args): \Closure
     {
-        $variableName = $this->pendingVariableName;
+        $variableName              = $this->pendingVariableName;
         $this->pendingVariableName = null;
 
         return function () use ($args, $variableName) {
@@ -131,7 +131,7 @@ class LaraDumps
     public function write(mixed $args = null, ?bool $autoInvokeApp = null, ?string $variableName = null): self
     {
         $this->pendingVariableName = $variableName;
-        [$payload, $id] = $this->beforeWrite($args)();
+        [$payload, $id]            = $this->beforeWrite($args)();
 
         /** @var Payload $payload */
         $payload->autoInvokeApp($autoInvokeApp);
