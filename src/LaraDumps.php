@@ -42,6 +42,8 @@ class LaraDumps
 
     public static ?\Closure $beforeSend = null;
 
+    private ?string $pendingVariableName = null;
+
     public function __construct(
         private string $notificationId = '',
     ) {
@@ -55,8 +57,11 @@ class LaraDumps
         $this->notificationId = Uuid::uuid4()->toString();
     }
 
-    protected function beforeWrite(mixed $args, ?string $variableName = null): \Closure
+    protected function beforeWrite(mixed $args): \Closure
     {
+        $variableName = $this->pendingVariableName;
+        $this->pendingVariableName = null;
+
         return function () use ($args, $variableName) {
             if (is_string($args) && Support::isJson($args)) {
                 return [
@@ -125,7 +130,8 @@ class LaraDumps
 
     public function write(mixed $args = null, ?bool $autoInvokeApp = null, ?string $variableName = null): self
     {
-        [$payload, $id] = $this->beforeWrite($args, $variableName)();
+        $this->pendingVariableName = $variableName;
+        [$payload, $id] = $this->beforeWrite($args)();
 
         /** @var Payload $payload */
         $payload->autoInvokeApp($autoInvokeApp);
