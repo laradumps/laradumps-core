@@ -11,6 +11,9 @@ class VariableParser
         }
 
         $source   = file_get_contents($file);
+        if ($source === false) {
+            return self::fallback($argCount, $callLine);
+        }
         $tokens   = token_get_all($source);
         $argNames = self::extractArgNames($tokens, $callLine, $argCount);
 
