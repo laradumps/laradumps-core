@@ -10,7 +10,8 @@ class VariableParser
             return self::fallback($argCount, $callLine);
         }
 
-        $source   = file_get_contents($file);
+        $source = file_get_contents($file);
+
         if ($source === false) {
             return self::fallback($argCount, $callLine);
         }
