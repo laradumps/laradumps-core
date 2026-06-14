@@ -1,13 +1,14 @@
 <?php
 
 use LaraDumps\LaraDumps\LaraDumps as LaravelLaraDumps;
+use LaraDumps\LaraDumpsCore\Actions\{Config, VariableParser};
 use LaraDumps\LaraDumpsCore\LaraDumps;
 
 if (!function_exists('appBasePath')) {
     function appBasePath(): string
     {
         $pwd = (defined('LARAVEL_START') || isset($_SERVER['LARAVEL_OCTANE'])) && function_exists('app')
-            ? app()->basePath()
+            ? app()->basePath() // @codeCoverageIgnore
             : (getcwd() ?: '');
 
         if ($pwd === '') {
@@ -31,20 +32,37 @@ if (!function_exists('appBasePath')) {
 if (!function_exists('ds')) {
     function ds(mixed ...$args): LaraDumps|LaravelLaraDumps
     {
-        $sendRequest = function ($args, LaraDumps $instance) {
-            if ($args) {
-                foreach ($args as $arg) {
-                    $instance->write($arg);
-                }
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+        $file  = $trace['file'] ?? 'unknown';
+        $line  = $trace['line'] ?? 0;
+
+        $sendRequest = function ($args, LaraDumps $instance) use ($file, $line) {
+            if (!$args) {
+                return;
+            }
+
+            if (Config::get('config.grouped_dumps', false) && count($args) > 1) {
+                $instance->writeGrouped($args, $file, $line);
+
+                return;
+            }
+
+            $varInfos = VariableParser::parse($file, $line, count($args));
+
+            foreach ($args as $i => $arg) {
+                $varName = $varInfos[$i]['name'] ?? null;
+                $instance->write($arg, variableName: $varName);
             }
         };
 
         if (class_exists(LaravelLaraDumps::class) && function_exists('app')) {
+            // @codeCoverageIgnoreStart
             $instance = app(LaravelLaraDumps::class);
 
             $sendRequest($args, $instance);
 
             return $instance;
+            // @codeCoverageIgnoreEnd
         }
 
         $instance = new LaraDumps();
@@ -63,12 +81,24 @@ if (!function_exists('phpinfo')) {
 }
 
 if (!function_exists('dsd')) {
+    /**
+     * @codeCoverageIgnore
+     */
     function dsd(mixed ...$args): void
     {
+        $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+        $file     = $trace['file'] ?? 'unknown';
+        $line     = $trace['line'] ?? 0;
         $instance = new LaraDumps();
 
-        foreach ($args as $arg) {
-            $instance->write($arg);
+        if (Config::get('config.grouped_dumps', false) && count($args) > 1) {
+            $instance->writeGrouped($args, $file, $line);
+        } else {
+            $varInfos = VariableParser::parse($file, $line, count($args));
+
+            foreach ($args as $i => $arg) {
+                $instance->write($arg, variableName: $varInfos[$i]['name'] ?? null);
+            }
         }
 
         die();
@@ -78,12 +108,25 @@ if (!function_exists('dsd')) {
 if (!function_exists('dsq')) {
     function dsq(mixed ...$args): void
     {
+        $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+        $file     = $trace['file'] ?? 'unknown';
+        $line     = $trace['line'] ?? 0;
         $instance = new LaraDumps();
 
-        if ($args) {
-            foreach ($args as $arg) {
-                $instance->write($arg, autoInvokeApp: false);
-            }
+        if (!$args) {
+            return;
+        }
+
+        if (Config::get('config.grouped_dumps', false) && count($args) > 1) {
+            $instance->writeGrouped($args, $file, $line);
+
+            return;
+        }
+
+        $varInfos = VariableParser::parse($file, $line, count($args));
+
+        foreach ($args as $i => $arg) {
+            $instance->write($arg, autoInvokeApp: false, variableName: $varInfos[$i]['name'] ?? null);
         }
     }
 }
@@ -92,7 +135,7 @@ if (!function_exists('runningInTest')) {
     function runningInTest(): bool
     {
         if (PHP_SAPI != 'cli') {
-            return false;
+            return false; // @codeCoverageIgnore
         }
 
         if (str_contains($_SERVER['argv'][0], 'phpunit')) {

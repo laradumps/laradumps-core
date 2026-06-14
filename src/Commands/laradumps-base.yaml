@@ -9,6 +9,7 @@ app:
 config:
     sleep: 0
     macos_auto_launch: false
+    grouped_dumps: false
 observers:
     auto_invoke_app: false
     enabled_in_testing: false
