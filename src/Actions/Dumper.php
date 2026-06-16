@@ -8,49 +8,43 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 
 class Dumper
 {
-    public static function dump(mixed $arguments, ?int $maxDepth = null): array
+    public static function dump(mixed $arguments, ?int $maxDepth = null, bool $forceCloner = false): array
     {
         $id = Uuid::uuid4()->toString();
 
-        if ($arguments === "") {
-            $arguments = "&nbsp; ";
-        }
+        if (!$forceCloner) {
+            if ($arguments === '') {
+                $arguments = '&nbsp; ';
+            }
 
-        if (is_null($arguments)) {
-            return [null, $id];
-        }
+            if (is_null($arguments)) {
+                return [null, $id];
+            }
 
-        if (is_string($arguments)) {
-            return [$arguments, $id];
-        }
+            if (is_string($arguments)) {
+                return [$arguments, $id];
+            }
 
-        if (is_int($arguments)) {
-            return [$arguments, $id];
-        }
+            if (is_int($arguments)) {
+                return [$arguments, $id];
+            }
 
-        if (is_bool($arguments)) {
-            return [$arguments, $id];
+            if (is_bool($arguments)) {
+                return [$arguments, $id];
+            }
         }
 
         $varCloner = new VarCloner();
-
-        $dumper = new HtmlDumper();
+        $dumper    = new HtmlDumper();
 
         if (!empty($maxDepth)) {
-            $dumper->setDisplayOptions([
-                'maxDepth' => $maxDepth,
-            ]);
+            $dumper->setDisplayOptions(['maxDepth' => $maxDepth]);
         }
 
         $htmlDumper = (string) $dumper->dump($varCloner->cloneVar($arguments), true);
+        $pre        = Support::cut($htmlDumper, '<pre ', '</pre>');
+        $id         = Support::between($pre, 'class=sf-dump id=sf-dump-', ' data-indent-pad="  "');
 
-        $pre = Support::cut($htmlDumper, '<pre ', '</pre>');
-
-        $id = Support::between($pre, 'class=sf-dump id=sf-dump-', ' data-indent-pad="  "');
-
-        return [
-            $pre,
-            $id,
-        ];
+        return [$pre, $id];
     }
 }

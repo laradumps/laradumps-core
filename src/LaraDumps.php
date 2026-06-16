@@ -3,7 +3,7 @@
 namespace LaraDumps\LaraDumpsCore;
 
 use Closure;
-use LaraDumps\LaraDumpsCore\Actions\{Config, Dumper, Support};
+use LaraDumps\LaraDumpsCore\Actions\{Config, ConvertArrayToPhpSyntax, Dumper, Support, VariableParser};
 use LaraDumps\LaraDumpsCore\Concerns\Colors;
 use LaraDumps\LaraDumpsCore\Dispatcher\Dispatcher;
 use LaraDumps\LaraDumpsCore\Payloads\{
@@ -11,6 +11,7 @@ use LaraDumps\LaraDumpsCore\Payloads\{
     ClearPayload,
     ColorPayload,
     DumpPayload,
+    GroupedDumpPayload,
     JsonPayload,
     LabelPayload,
     Payload,
@@ -41,6 +42,8 @@ class LaraDumps
 
     public static ?\Closure $beforeSend = null;
 
+    private ?string $pendingVariableName = null;
+
     public function __construct(
         private string $notificationId = '',
     ) {
@@ -56,7 +59,10 @@ class LaraDumps
 
     protected function beforeWrite(mixed $args): \Closure
     {
-        return function () use ($args) {
+        $variableName              = $this->pendingVariableName;
+        $this->pendingVariableName = null;
+
+        return function () use ($args, $variableName) {
             if (is_string($args) && Support::isJson($args)) {
                 return [
                     new JsonPayload($args),
@@ -67,7 +73,7 @@ class LaraDumps
             [$pre, $id] = Dumper::dump($args);
 
             return [
-                new DumpPayload($pre, $args, variableType: gettype($args)),
+                new DumpPayload($pre, $args, variableType: gettype($args), variableName: $variableName),
                 $id,
             ];
         };
@@ -98,13 +104,34 @@ class LaraDumps
         return $payload;
     }
 
-    public function write(mixed $args = null, ?bool $autoInvokeApp = null): self
+    public function writeGrouped(array $args, string $file, int $line): self
     {
-        [$payload, $id] = $this->beforeWrite($args)();
+        $varInfos = VariableParser::parse($file, $line, count($args));
+        $items    = [];
 
-        if (empty($payload) && is_null($id)) {
-            return $this;
+        foreach ($args as $i => $arg) {
+            [$dumpHtml, $sfDumpId] = Dumper::dump($arg, forceCloner: true);
+
+            $items[] = [
+                'name'             => $varInfos[$i]['name'] ?? 'arg' . $i,
+                'line'             => $varInfos[$i]['line'] ?? $line,
+                'sf_dump_id'       => $sfDumpId,
+                'dump'             => $dumpHtml,
+                'original_content' => ConvertArrayToPhpSyntax::convert($arg),
+                'variable_type'    => gettype($arg),
+            ];
         }
+
+        $payload = new GroupedDumpPayload($items);
+        $this->send($payload);
+
+        return $this;
+    }
+
+    public function write(mixed $args = null, ?bool $autoInvokeApp = null, ?string $variableName = null): self
+    {
+        $this->pendingVariableName = $variableName;
+        [$payload, $id]            = $this->beforeWrite($args)();
 
         /** @var Payload $payload */
         $payload->autoInvokeApp($autoInvokeApp);
@@ -183,6 +210,8 @@ class LaraDumps
 
     /**
      * Send dump and die
+     *
+     * @codeCoverageIgnore
      */
     public function die(string $status = ''): void
     {
@@ -327,7 +356,7 @@ class LaraDumps
     public static function macosAutoLaunch(): void
     {
         if (PHP_OS_FAMILY != 'Darwin') {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         if (!Config::get('config.macos_auto_launch', false)) {

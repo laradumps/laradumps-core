@@ -139,3 +139,48 @@ it('code snippet work properly - second Code Snippet file contents', function ()
         ->and($context[1])
         ->snippet->toHaveCount(15);
 });
+
+it('setCodeSnippet stores and includes code_snippet in toArray', function () {
+    $laradumps = new LaraDumps();
+    $payload   = new DumpPayload('test');
+    $payload->setFrame(['file' => 'Test.php', 'line' => 1]);
+
+    $snippet = [
+        ['file' => 'Test.php', 'line' => 10, 'snippet' => [9 => 'line 9', 10 => 'line 10', 11 => 'line 11']],
+    ];
+    $payload->setCodeSnippet($snippet);
+    $payload->setNotificationId('test-id');
+
+    $array = $payload->toArray();
+    expect($array['code_snippet'])->toBe($snippet);
+});
+
+it('getExtraPayload returns empty array when Laravel is not available', function () {
+    $payload = new DumpPayload('test');
+    $payload->setFrame(['file' => 'Test.php', 'line' => 1]);
+    $payload->setNotificationId('test-id');
+
+    $array = $payload->toArray();
+    // Without Laravel, extra should be empty array
+    expect($array['extra'])->toBe([]);
+});
+
+it('toArray includes original_content when set', function () {
+    $payload = new DumpPayload('test', 'original');
+    $payload->setFrame(['file' => 'Test.php', 'line' => 1]);
+    $payload->setNotificationId('test-id');
+
+    $array = $payload->toArray();
+    expect($array['dump'])->toHaveKey('original_content');
+});
+
+it('toArray does not add base original_content when originalContent property is null', function () {
+    // Use a ClearPayload which has no originalContent set
+    $payload = new \LaraDumps\LaraDumpsCore\Payloads\ClearPayload();
+    $payload->setFrame(['file' => 'Test.php', 'line' => 1]);
+    $payload->setNotificationId('test-id');
+
+    $array = $payload->toArray();
+    // ClearPayload content should not have 'original_content' key added by base Payload
+    expect($array['clear'])->not->toHaveKey('original_content');
+});

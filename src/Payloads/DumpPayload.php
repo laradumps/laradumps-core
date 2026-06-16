@@ -12,6 +12,7 @@ class DumpPayload extends Payload
         public ?string $variableType = null,
         private string $screen = 'home',
         private string $label = '',
+        public ?string $variableName = null,
     ) {
     }
 
@@ -26,6 +27,7 @@ class DumpPayload extends Payload
             'dump'             => $this->dump,
             'original_content' => ConvertArrayToPhpSyntax::convert($this->originalContent),
             'variable_type'    => $this->variableType,
+            'variable_name'    => $this->variableName,
         ];
     }
 
