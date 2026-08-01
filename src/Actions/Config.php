@@ -18,18 +18,6 @@ class Config
         }
     }
 
-    /**
-     * Locate the laradumps.yaml config file by walking up the directory tree
-     * from the current working directory — the same strategy spatie/ray uses
-     * to find ray.php. This keeps config discovery independent of the entry
-     * point, so it also works with CMS that serve requests from a nested
-     * document root (e.g. TYPO3's public/typo3/ backend, where the working
-     * directory is below the project root and stripping a single known suffix
-     * is not enough).
-     *
-     * Falls back to the conventional location next to the document root when
-     * no config file exists yet, e.g. when `laradumps init` first creates it.
-     */
     private static function locateConfigFile(): string
     {
         $directory = getcwd();
@@ -78,8 +66,42 @@ class Config
     {
         self::init();
         self::$cachedContent = $content;
-        $yamlContent         = Yaml::dump($content);
+
+        $yamlContent = Yaml::dump($content, 4, 2);
         file_put_contents(self::$configFilePath, $yamlContent);
+    }
+
+    public static function sync(array $defaults): bool
+    {
+        $current    = self::loadConfig();
+        $reconciled = self::reconcile($defaults, $current);
+
+        if ($reconciled === $current) {
+            return false;
+        }
+
+        self::saveConfig($reconciled);
+
+        return true;
+    }
+
+    private static function reconcile(array $defaults, array $current): array
+    {
+        $result = [];
+
+        foreach ($defaults as $key => $defaultValue) {
+            if (array_key_exists($key, $current)) {
+                $result[$key] = (is_array($defaultValue) && is_array($current[$key]))
+                    ? self::reconcile($defaultValue, $current[$key])
+                    : $current[$key];
+
+                continue;
+            }
+
+            $result[$key] = $defaultValue;
+        }
+
+        return $result;
     }
 
     public static function publish(string $pwd, string $filepath): bool
