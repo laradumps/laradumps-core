@@ -99,9 +99,14 @@ class LaraDumps
             $closure($payload, $withFrame);
         }
 
-        (new Dispatcher())->handle($payload->toArray());
+        $this->dispatchPayload($payload);
 
         return $payload;
+    }
+
+    protected function dispatchPayload(Payload $payload): void
+    {
+        (new Dispatcher())->handle($payload->toArray());
     }
 
     public function writeGrouped(array $args, string $file, int $line): self
