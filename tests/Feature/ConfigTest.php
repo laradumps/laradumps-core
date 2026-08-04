@@ -365,7 +365,7 @@ describe('Config config discovery (traverse-up bound)', function () {
 
         $located = locate($root . '/project/sub');
 
-        expect($located)->not->toBe(realpath($root) . '/laradumps.yaml');
+        expect($located)->not->toBe(realpath($root) . DIRECTORY_SEPARATOR . 'laradumps.yaml');
 
         // cleanup
         @unlink($root . '/laradumps.yaml');
@@ -383,7 +383,7 @@ describe('Config config discovery (traverse-up bound)', function () {
 
         $located = locate($root . '/sub');
 
-        expect($located)->toBe(realpath($root) . '/laradumps.yaml');
+        expect($located)->toBe(realpath($root) . DIRECTORY_SEPARATOR . 'laradumps.yaml');
 
         @unlink($root . '/laradumps.yaml');
         @unlink($root . '/composer.json');
