@@ -11,6 +11,9 @@ class Config
 
     private static string $configFilePath;
 
+    /** @var array<int, array<string, mixed>> */
+    private static array $registeredDefaults = [];
+
     private static function init(): void
     {
         if (!isset(self::$configFilePath)) {
@@ -18,21 +21,9 @@ class Config
         }
     }
 
-    /**
-     * Locate the laradumps.yaml config file by walking up the directory tree
-     * from the current working directory — the same strategy spatie/ray uses
-     * to find ray.php. This keeps config discovery independent of the entry
-     * point, so it also works with CMS that serve requests from a nested
-     * document root (e.g. TYPO3's public/typo3/ backend, where the working
-     * directory is below the project root and stripping a single known suffix
-     * is not enough).
-     *
-     * Falls back to the conventional location next to the document root when
-     * no config file exists yet, e.g. when `laradumps init` first creates it.
-     */
-    private static function locateConfigFile(): string
+    private static function locateConfigFile(?string $startDir = null): string
     {
-        $directory = getcwd();
+        $directory = $startDir ?? getcwd();
 
         if ($directory !== false) {
             $directory = rtrim(realpath($directory) ?: $directory, DIRECTORY_SEPARATOR);
@@ -42,6 +33,10 @@ class Config
 
                 if (file_exists($candidate)) {
                     return $candidate;
+                }
+
+                if (file_exists($directory . DIRECTORY_SEPARATOR . 'composer.json')) {
+                    break;
                 }
 
                 $parent = dirname($directory);
@@ -78,8 +73,103 @@ class Config
     {
         self::init();
         self::$cachedContent = $content;
-        $yamlContent         = Yaml::dump($content);
+
+        $yamlContent = Yaml::dump($content, 4, 2);
         file_put_contents(self::$configFilePath, $yamlContent);
+    }
+
+    public static function baseConfigPath(): string
+    {
+        return __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Commands' . DIRECTORY_SEPARATOR . 'laradumps-base.yaml';
+    }
+
+    /**
+     * @param array<string, mixed> $defaults
+     */
+    public static function registerDefaults(array $defaults): void
+    {
+        self::$registeredDefaults[] = $defaults;
+    }
+
+    public static function defaults(): array
+    {
+        $defaults = self::baseDefaults();
+
+        foreach (self::$registeredDefaults as $extra) {
+            $defaults = array_replace_recursive($defaults, $extra);
+        }
+
+        return $defaults;
+    }
+
+    private static function baseDefaults(): array
+    {
+        try {
+            return (array) Yaml::parseFile(self::baseConfigPath());
+        } catch (ParseException) {
+            return [];
+        }
+    }
+
+    /**
+     * Reconcile the user's config against the full default schema.
+     * Runs once per process, only outside tests and when a config file exists.
+     * Never throws: a dev tool must never break the host application.
+     */
+    public static function selfHeal(): bool
+    {
+        static $done = false;
+
+        if ($done) {
+            return false;
+        }
+
+        $done = true;
+
+        if (runningInTest() || !self::exists()) {
+            return false;
+        }
+
+        try {
+            return self::sync();
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public static function sync(?array $defaults = null): bool
+    {
+        $defaults ??= self::defaults();
+
+        $current    = self::loadConfig();
+        $reconciled = self::reconcile($defaults, $current);
+
+        if ($reconciled === $current) {
+            return false;
+        }
+
+        self::saveConfig($reconciled);
+
+        return true;
+    }
+
+    private static function reconcile(array $defaults, array $current): array
+    {
+        $result = [];
+
+        foreach ($defaults as $key => $defaultValue) {
+            if (array_key_exists($key, $current)) {
+                $result[$key] = (is_array($defaultValue) && is_array($current[$key]))
+                    ? self::reconcile($defaultValue, $current[$key])
+                    : $current[$key];
+
+                continue;
+            }
+
+            $result[$key] = $defaultValue;
+        }
+
+        return $result;
     }
 
     public static function publish(string $pwd, string $filepath): bool

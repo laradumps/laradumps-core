@@ -2,19 +2,18 @@
 
 use LaraDumps\LaraDumpsCore\Actions\Config;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Yaml;
 
 uses(TestCase::class);
 
-// Helpers to create/remove a temp config file and redirect Config to it
 function withTempConfig(array $content, callable $fn): void
 {
     $dir = sys_get_temp_dir() . '/laradumps_config_test_' . uniqid();
     mkdir($dir);
     $file = $dir . '/laradumps.yaml';
 
-    file_put_contents($file, \Symfony\Component\Yaml\Yaml::dump($content));
+    file_put_contents($file, Yaml::dump($content));
 
-    // Patch configFilePath via reflection
     $ref  = new ReflectionClass(Config::class);
     $path = $ref->getProperty('configFilePath');
     $path->setAccessible(true);
@@ -122,7 +121,7 @@ describe('Config::set()', function () {
 describe('Config::publish()', function () {
     it('returns true and writes project_path on success', function () {
         $srcFile = sys_get_temp_dir() . '/ld_publish_src_' . uniqid() . '.yaml';
-        file_put_contents($srcFile, \Symfony\Component\Yaml\Yaml::dump([
+        file_put_contents($srcFile, Yaml::dump([
             'observers' => ['enabled_in_testing' => true],
             'app'       => ['port' => 9191],
         ]));
@@ -189,5 +188,206 @@ describe('Config::get() with enabled_in_testing false and missing key', function
             // Key doesn't exist, runningInTest() is true, enabled_in_testing is false
             expect(Config::get('nonexistent.key', 'default'))->toBeFalse();
         });
+    });
+});
+
+describe('Config::sync()', function () {
+    it('adds keys introduced in the default schema', function () {
+        withTempConfig([
+            'observers' => ['enabled_in_testing' => true],
+            'config'    => ['sleep' => 0],
+        ], function ($file) {
+            $defaults = [
+                'observers'    => ['enabled_in_testing' => false],
+                'config'       => ['sleep' => 0, 'color_in_screen' => false],
+                'code_snippet' => ['above' => 7, 'below' => 3],
+            ];
+
+            $changed = Config::sync($defaults);
+
+            expect($changed)->toBeTrue();
+
+            $written = Yaml::parseFile($file);
+            expect($written['config'])->toHaveKey('color_in_screen')
+                ->and($written['config']['color_in_screen'])->toBeFalse()
+                ->and($written)->toHaveKey('code_snippet')
+                ->and($written['code_snippet']['above'])->toBe(7);
+        });
+    });
+
+    it('removes keys that are no longer in the schema (prune)', function () {
+        withTempConfig([
+            'observers'        => ['enabled_in_testing' => true],
+            'config'           => ['sleep' => 0, 'legacy_option' => true],
+            'obsolete_section' => ['foo' => 'bar'],
+        ], function ($file) {
+            $defaults = [
+                'observers' => ['enabled_in_testing' => false],
+                'config'    => ['sleep' => 0],
+            ];
+
+            $changed = Config::sync($defaults);
+
+            expect($changed)->toBeTrue();
+
+            $written = Yaml::parseFile($file);
+            expect($written['config'])->not->toHaveKey('legacy_option')
+                ->and($written)->not->toHaveKey('obsolete_section');
+        });
+    });
+
+    it('preserves values the user already set', function () {
+        withTempConfig([
+            'observers' => ['enabled_in_testing' => true, 'queries' => true],
+            'config'    => ['sleep' => 5],
+            'app'       => ['project_path' => '/my/project/'],
+        ], function ($file) {
+            $defaults = [
+                'app'       => ['project_path' => null, 'port' => 9191],
+                'observers' => ['enabled_in_testing' => false, 'queries' => false],
+                'config'    => ['sleep' => 0],
+            ];
+
+            Config::sync($defaults);
+
+            $written = Yaml::parseFile($file);
+            expect($written['config']['sleep'])->toBe(5);          // kept
+            expect($written['observers']['queries'])->toBeTrue();  // kept
+            expect($written['app']['project_path'])->toBe('/my/project/'); // kept
+            expect($written['app']['port'])->toBe(9191);           // added
+        });
+    });
+
+    it('merges nested maps recursively', function () {
+        withTempConfig([
+            'observers' => ['enabled_in_testing' => true],
+            'profile'   => ['capture' => ['app' => false]],
+        ], function ($file) {
+            $defaults = [
+                'observers' => ['enabled_in_testing' => false],
+                'profile'   => [
+                    'auto_middleware' => false,
+                    'capture'         => ['app' => true, 'events' => true, 'queries' => true],
+                ],
+            ];
+
+            Config::sync($defaults);
+
+            $written = Yaml::parseFile($file);
+            expect($written['profile']['capture']['app'])->toBeFalse()
+                ->and($written['profile']['capture'])->toHaveKey('events')
+                ->and($written['profile']['capture']['queries'])->toBeTrue()
+                ->and($written['profile']['auto_middleware'])->toBeFalse();
+        });
+    });
+
+    it('returns false and does not rewrite when nothing changed', function () {
+        $content = [
+            'observers' => ['enabled_in_testing' => true],
+            'config'    => ['sleep' => 0],
+        ];
+
+        withTempConfig($content, function () use ($content) {
+            expect(Config::sync($content))->toBeFalse();
+        });
+    });
+
+    it('falls back to the core defaults when no schema is passed', function () {
+        withTempConfig([
+            'observers' => ['enabled_in_testing' => true],
+        ], function ($file) {
+            $changed = Config::sync();
+
+            expect($changed)->toBeTrue();
+
+            $written = Yaml::parseFile($file);
+            expect($written)->toHaveKeys(['app', 'config', 'observers', 'xdebug', 'code_snippet'])
+                ->and($written['config'])->toHaveKey('color_in_screen');
+        });
+    });
+});
+
+describe('Config::defaults()', function () {
+    it('loads the core base schema from the shipped yaml', function () {
+        $defaults = Config::defaults();
+
+        expect($defaults)->toHaveKeys(['app', 'config', 'observers', 'xdebug', 'code_snippet'])
+            ->and($defaults['config'])->toHaveKey('color_in_screen')
+            ->and($defaults['config']['color_in_screen'])->toBeFalse();
+    });
+
+    it('points baseConfigPath at an existing yaml file', function () {
+        expect(file_exists(Config::baseConfigPath()))->toBeTrue();
+    });
+
+    it('merges registered defaults on top of the core schema', function () {
+        $ref  = new ReflectionClass(Config::class);
+        $prop = $ref->getProperty('registeredDefaults');
+        $prop->setAccessible(true);
+        $original = $prop->getValue();
+
+        try {
+            Config::registerDefaults(['observers' => ['dump' => false], 'logs' => ['info' => true]]);
+
+            $defaults = Config::defaults();
+
+            expect($defaults)->toHaveKey('logs')
+                ->and($defaults['observers'])->toHaveKey('dump')
+                ->and($defaults['config'])->toHaveKey('color_in_screen');
+        } finally {
+            $prop->setValue(null, $original);
+        }
+    });
+});
+
+describe('Config::selfHeal()', function () {
+    it('is a no-op while running under a test runner', function () {
+        expect(Config::selfHeal())->toBeFalse();
+    });
+});
+
+describe('Config config discovery (traverse-up bound)', function () {
+    function locate(string $startDir): string
+    {
+        $ref = new ReflectionClass(Config::class);
+        $m   = $ref->getMethod('locateConfigFile');
+        $m->setAccessible(true);
+
+        return $m->invoke(null, $startDir);
+    }
+
+    it('does not escape above the nearest composer.json', function () {
+        $root = sys_get_temp_dir() . '/ld_bound_' . uniqid();
+        mkdir($root . '/project/sub', 0777, true);
+        // Stray config ABOVE the project root — must NOT be picked up
+        file_put_contents($root . '/laradumps.yaml', "config:\n  sleep: 9\n");
+        file_put_contents($root . '/project/composer.json', '{}');
+
+        $located = locate($root . '/project/sub');
+
+        expect($located)->not->toBe(realpath($root) . DIRECTORY_SEPARATOR . 'laradumps.yaml');
+
+        // cleanup
+        @unlink($root . '/laradumps.yaml');
+        @unlink($root . '/project/composer.json');
+        @rmdir($root . '/project/sub');
+        @rmdir($root . '/project');
+        @rmdir($root);
+    });
+
+    it('finds laradumps.yaml at the project root from a subdirectory', function () {
+        $root = sys_get_temp_dir() . '/ld_bound_' . uniqid();
+        mkdir($root . '/sub', 0777, true);
+        file_put_contents($root . '/composer.json', '{}');
+        file_put_contents($root . '/laradumps.yaml', "config:\n  sleep: 1\n");
+
+        $located = locate($root . '/sub');
+
+        expect($located)->toBe(realpath($root) . DIRECTORY_SEPARATOR . 'laradumps.yaml');
+
+        @unlink($root . '/laradumps.yaml');
+        @unlink($root . '/composer.json');
+        @rmdir($root . '/sub');
+        @rmdir($root);
     });
 });

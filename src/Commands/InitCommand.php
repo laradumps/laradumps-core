@@ -34,7 +34,7 @@ class InitCommand extends Command
 
         $publish = Config::publish(
             pwd: $pwd,
-            filepath: __DIR__ . '/laradumps-base.yaml'
+            filepath: Config::baseConfigPath()
         );
 
         $output->writeln('');
