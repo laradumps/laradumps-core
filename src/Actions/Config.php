@@ -11,6 +11,9 @@ class Config
 
     private static string $configFilePath;
 
+    /** @var array<int, array<string, mixed>> */
+    private static array $registeredDefaults = [];
+
     private static function init(): void
     {
         if (!isset(self::$configFilePath)) {
@@ -71,8 +74,69 @@ class Config
         file_put_contents(self::$configFilePath, $yamlContent);
     }
 
-    public static function sync(array $defaults): bool
+    public static function baseConfigPath(): string
     {
+        return __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Commands' . DIRECTORY_SEPARATOR . 'laradumps-base.yaml';
+    }
+
+    /**
+     * @param array<string, mixed> $defaults
+     */
+    public static function registerDefaults(array $defaults): void
+    {
+        self::$registeredDefaults[] = $defaults;
+    }
+
+    public static function defaults(): array
+    {
+        $defaults = self::baseDefaults();
+
+        foreach (self::$registeredDefaults as $extra) {
+            $defaults = array_replace_recursive($defaults, $extra);
+        }
+
+        return $defaults;
+    }
+
+    private static function baseDefaults(): array
+    {
+        try {
+            return (array) Yaml::parseFile(self::baseConfigPath());
+        } catch (ParseException) {
+            return [];
+        }
+    }
+
+    /**
+     * Reconcile the user's config against the full default schema.
+     * Runs once per process, only outside tests and when a config file exists.
+     * Never throws: a dev tool must never break the host application.
+     */
+    public static function selfHeal(): bool
+    {
+        static $done = false;
+
+        if ($done) {
+            return false;
+        }
+
+        $done = true;
+
+        if (runningInTest() || !self::exists()) {
+            return false;
+        }
+
+        try {
+            return self::sync();
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public static function sync(?array $defaults = null): bool
+    {
+        $defaults ??= self::defaults();
+
         $current    = self::loadConfig();
         $reconciled = self::reconcile($defaults, $current);
 

@@ -208,10 +208,10 @@ describe('Config::sync()', function () {
             expect($changed)->toBeTrue();
 
             $written = Yaml::parseFile($file);
-            expect($written['config'])->toHaveKey('color_in_screen');
-            expect($written['config']['color_in_screen'])->toBeFalse();
-            expect($written)->toHaveKey('code_snippet');
-            expect($written['code_snippet']['above'])->toBe(7);
+            expect($written['config'])->toHaveKey('color_in_screen')
+                ->and($written['config']['color_in_screen'])->toBeFalse()
+                ->and($written)->toHaveKey('code_snippet')
+                ->and($written['code_snippet']['above'])->toBe(7);
         });
     });
 
@@ -231,8 +231,8 @@ describe('Config::sync()', function () {
             expect($changed)->toBeTrue();
 
             $written = Yaml::parseFile($file);
-            expect($written['config'])->not->toHaveKey('legacy_option');
-            expect($written)->not->toHaveKey('obsolete_section');
+            expect($written['config'])->not->toHaveKey('legacy_option')
+                ->and($written)->not->toHaveKey('obsolete_section');
         });
     });
 
@@ -274,10 +274,10 @@ describe('Config::sync()', function () {
             Config::sync($defaults);
 
             $written = Yaml::parseFile($file);
-            expect($written['profile']['capture']['app'])->toBeFalse();  // user value kept
-            expect($written['profile']['capture'])->toHaveKey('events'); // added
-            expect($written['profile']['capture']['queries'])->toBeTrue();
-            expect($written['profile']['auto_middleware'])->toBeFalse(); // added
+            expect($written['profile']['capture']['app'])->toBeFalse()
+                ->and($written['profile']['capture'])->toHaveKey('events')
+                ->and($written['profile']['capture']['queries'])->toBeTrue()
+                ->and($written['profile']['auto_middleware'])->toBeFalse();
         });
     });
 
@@ -290,5 +290,58 @@ describe('Config::sync()', function () {
         withTempConfig($content, function () use ($content) {
             expect(Config::sync($content))->toBeFalse();
         });
+    });
+
+    it('falls back to the core defaults when no schema is passed', function () {
+        withTempConfig([
+            'observers' => ['enabled_in_testing' => true],
+        ], function ($file) {
+            $changed = Config::sync();
+
+            expect($changed)->toBeTrue();
+
+            $written = Yaml::parseFile($file);
+            expect($written)->toHaveKeys(['app', 'config', 'observers', 'xdebug', 'code_snippet'])
+                ->and($written['config'])->toHaveKey('color_in_screen');
+        });
+    });
+});
+
+describe('Config::defaults()', function () {
+    it('loads the core base schema from the shipped yaml', function () {
+        $defaults = Config::defaults();
+
+        expect($defaults)->toHaveKeys(['app', 'config', 'observers', 'xdebug', 'code_snippet'])
+            ->and($defaults['config'])->toHaveKey('color_in_screen')
+            ->and($defaults['config']['color_in_screen'])->toBeFalse();
+    });
+
+    it('points baseConfigPath at an existing yaml file', function () {
+        expect(file_exists(Config::baseConfigPath()))->toBeTrue();
+    });
+
+    it('merges registered defaults on top of the core schema', function () {
+        $ref  = new ReflectionClass(Config::class);
+        $prop = $ref->getProperty('registeredDefaults');
+        $prop->setAccessible(true);
+        $original = $prop->getValue();
+
+        try {
+            Config::registerDefaults(['observers' => ['dump' => false], 'logs' => ['info' => true]]);
+
+            $defaults = Config::defaults();
+
+            expect($defaults)->toHaveKey('logs')
+                ->and($defaults['observers'])->toHaveKey('dump')
+                ->and($defaults['config'])->toHaveKey('color_in_screen');
+        } finally {
+            $prop->setValue(null, $original);
+        }
+    });
+});
+
+describe('Config::selfHeal()', function () {
+    it('is a no-op while running under a test runner', function () {
+        expect(Config::selfHeal())->toBeFalse();
     });
 });

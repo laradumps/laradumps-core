@@ -47,6 +47,8 @@ class LaraDumps
     public function __construct(
         private string $notificationId = '',
     ) {
+        Config::selfHeal();
+
         /** @var int $sleep */
         $sleep = Config::get('config.sleep', 0);
 
