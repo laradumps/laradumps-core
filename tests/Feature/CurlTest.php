@@ -13,6 +13,31 @@ beforeEach(function () {
     $prop->setValue(null, false);
 });
 
+function waitForServer(string $host, int $port, int $timeoutMs = 3000): void
+{
+    $deadline = microtime(true) + ($timeoutMs / 1000);
+
+    // Silence the expected "Connection refused" notices while the server boots
+    // (PHPUnit's error handler surfaces them even through the @ operator).
+    set_error_handler(static fn (): bool => true);
+
+    try {
+        while (microtime(true) < $deadline) {
+            $conn = fsockopen($host, $port, $errno, $errstr, 0.1);
+
+            if ($conn !== false) {
+                fclose($conn);
+
+                return;
+            }
+
+            usleep(20000);
+        }
+    } finally {
+        restore_error_handler();
+    }
+}
+
 describe('Curl::make()', function () {
     it('returns a Curl instance', function () {
         $curl = Curl::make();
@@ -78,8 +103,8 @@ describe('Curl::dispatch() with mock server', function () {
             $pipes
         );
 
-        // Give the server time to start
-        usleep(300000);
+        // Wait until the server is ready to accept connections
+        waitForServer('127.0.0.1', $port);
 
         try {
             $curl   = new Curl();
@@ -105,7 +130,7 @@ describe('Curl::dispatch() with mock server', function () {
             $pipes
         );
 
-        usleep(300000);
+        waitForServer('127.0.0.1', $port);
 
         try {
             $curl   = new Curl();
@@ -132,7 +157,7 @@ describe('Curl::dispatch() with mock server', function () {
             $pipes
         );
 
-        usleep(300000);
+        waitForServer('127.0.0.1', $port);
 
         try {
             // Create a Curl with secondary pointing to our mock server
@@ -173,7 +198,7 @@ describe('Curl::dispatch() with mock server', function () {
             $pipes
         );
 
-        usleep(300000);
+        waitForServer('127.0.0.1', $port);
 
         try {
             $curl = new Curl();

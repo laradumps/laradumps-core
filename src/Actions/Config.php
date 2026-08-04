@@ -21,9 +21,9 @@ class Config
         }
     }
 
-    private static function locateConfigFile(): string
+    private static function locateConfigFile(?string $startDir = null): string
     {
-        $directory = getcwd();
+        $directory = $startDir ?? getcwd();
 
         if ($directory !== false) {
             $directory = rtrim(realpath($directory) ?: $directory, DIRECTORY_SEPARATOR);
@@ -33,6 +33,10 @@ class Config
 
                 if (file_exists($candidate)) {
                     return $candidate;
+                }
+
+                if (file_exists($directory . DIRECTORY_SEPARATOR . 'composer.json')) {
+                    break;
                 }
 
                 $parent = dirname($directory);

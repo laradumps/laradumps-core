@@ -345,3 +345,49 @@ describe('Config::selfHeal()', function () {
         expect(Config::selfHeal())->toBeFalse();
     });
 });
+
+describe('Config config discovery (traverse-up bound)', function () {
+    function locate(string $startDir): string
+    {
+        $ref = new ReflectionClass(Config::class);
+        $m   = $ref->getMethod('locateConfigFile');
+        $m->setAccessible(true);
+
+        return $m->invoke(null, $startDir);
+    }
+
+    it('does not escape above the nearest composer.json', function () {
+        $root = sys_get_temp_dir() . '/ld_bound_' . uniqid();
+        mkdir($root . '/project/sub', 0777, true);
+        // Stray config ABOVE the project root — must NOT be picked up
+        file_put_contents($root . '/laradumps.yaml', "config:\n  sleep: 9\n");
+        file_put_contents($root . '/project/composer.json', '{}');
+
+        $located = locate($root . '/project/sub');
+
+        expect($located)->not->toBe(realpath($root) . '/laradumps.yaml');
+
+        // cleanup
+        @unlink($root . '/laradumps.yaml');
+        @unlink($root . '/project/composer.json');
+        @rmdir($root . '/project/sub');
+        @rmdir($root . '/project');
+        @rmdir($root);
+    });
+
+    it('finds laradumps.yaml at the project root from a subdirectory', function () {
+        $root = sys_get_temp_dir() . '/ld_bound_' . uniqid();
+        mkdir($root . '/sub', 0777, true);
+        file_put_contents($root . '/composer.json', '{}');
+        file_put_contents($root . '/laradumps.yaml', "config:\n  sleep: 1\n");
+
+        $located = locate($root . '/sub');
+
+        expect($located)->toBe(realpath($root) . '/laradumps.yaml');
+
+        @unlink($root . '/laradumps.yaml');
+        @unlink($root . '/composer.json');
+        @rmdir($root . '/sub');
+        @rmdir($root);
+    });
+});
