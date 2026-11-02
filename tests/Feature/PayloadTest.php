@@ -2,7 +2,7 @@
 
 use LaraDumps\LaraDumpsCore\Actions\{Dumper};
 use LaraDumps\LaraDumpsCore\LaraDumps;
-use LaraDumps\LaraDumpsCore\Payloads\{DumpPayload, TableV2Payload};
+use LaraDumps\LaraDumpsCore\Payloads\{DumpPayload, Payload, TableV2Payload};
 use LaraDumps\LaraDumpsCore\Tests\Feature\ClassWithException;
 
 it('should return the correct payload to dump', function () {
@@ -183,4 +183,17 @@ it('toArray does not add base original_content when originalContent property is 
     $array = $payload->toArray();
     // ClearPayload content should not have 'original_content' key added by base Payload
     expect($array['clear'])->not->toHaveKey('original_content');
+});
+
+it('gives each request started in a long-lived worker its own request_id', function () {
+    $send = fn () => (new LaraDumps())->send(new DumpPayload('x'), withFrame: false)->toArray();
+
+    Payload::startRequest();
+
+    $first = $send();
+    expect($send()['request_id'])->toBe($first['request_id'])
+        ->and($first['sent_at'])->toBeFloat();
+
+    Payload::startRequest();
+    expect($send()['request_id'])->not->toBe($first['request_id']);
 });
