@@ -19,7 +19,14 @@ abstract class Payload
 
     protected mixed $originalContent = null;
 
+    private static ?string $requestId = null;
+
     abstract public function type(): string;
+
+    public static function startRequest(): void
+    {
+        self::$requestId = uniqid('', true);
+    }
 
     abstract public function toScreen(): array|Screen;
 
@@ -97,7 +104,8 @@ abstract class Payload
         return [
             'id'               => $this->notificationId,
             'application_path' => $this->applicationPath(),
-            'request_id'       => LARADUMPS_REQUEST_ID,
+            'request_id'       => self::$requestId ?? LARADUMPS_REQUEST_ID,
+            'sent_at'          => microtime(true),
             'sf_dump_id'       => $this->dumpId,
             'type'             => $this->type(),
             $this->type()      => $content,
