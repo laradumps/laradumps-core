@@ -9,6 +9,10 @@ class Config
 {
     private static ?array $cachedContent = null;
 
+    private static ?string $loadedYaml = null;
+
+    private static float $checkedAt = 0;
+
     private static string $configFilePath;
 
     /** @var array<int, array<string, mixed>> */
@@ -56,17 +60,33 @@ class Config
     {
         self::init();
 
+        if (self::$cachedContent !== null && microtime(true) - self::$checkedAt >= 1) {
+            self::$checkedAt = microtime(true);
+
+            if (self::readYaml() !== self::$loadedYaml) {
+                self::$cachedContent = null;
+            }
+        }
+
         if (self::$cachedContent === null) {
+            self::$loadedYaml = self::readYaml();
+            self::$checkedAt  = microtime(true);
+
             try {
-                self::$cachedContent = file_exists(self::$configFilePath)
-                    ? (array) Yaml::parseFile(self::$configFilePath)
-                    : [];
+                self::$cachedContent = self::$loadedYaml !== null ? (array) Yaml::parse(self::$loadedYaml) : [];
             } catch (ParseException) {
                 self::$cachedContent = [];
             }
         }
 
         return self::$cachedContent;
+    }
+
+    private static function readYaml(): ?string
+    {
+        $yaml = file_exists(self::$configFilePath) ? file_get_contents(self::$configFilePath) : false;
+
+        return $yaml === false ? null : $yaml;
     }
 
     private static function saveConfig(array $content): void
@@ -76,6 +96,7 @@ class Config
 
         $yamlContent = Yaml::dump($content, 4, 2);
         file_put_contents(self::$configFilePath, $yamlContent);
+        self::$loadedYaml = $yamlContent;
     }
 
     public static function baseConfigPath(): string

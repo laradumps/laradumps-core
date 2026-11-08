@@ -64,6 +64,19 @@ describe('Config::get()', function () {
             expect(Config::get('config.sleep', 0))->toBeFalse();
         });
     });
+
+    it('picks up edits to the file in long-lived processes, at most once a second', function () {
+        withTempConfig(['observers' => ['enabled_in_testing' => true, 'cache' => true]], function ($file) {
+            expect(Config::get('observers.cache'))->toBeTrue();
+
+            file_put_contents($file, Yaml::dump(['observers' => ['enabled_in_testing' => true, 'cache' => false]]));
+            expect(Config::get('observers.cache'))->toBeTrue();
+
+            $checkedAt = new ReflectionProperty(Config::class, 'checkedAt');
+            $checkedAt->setValue(null, microtime(true) - 1);
+            expect(Config::get('observers.cache'))->toBeFalse();
+        });
+    });
 });
 
 describe('Config::exists()', function () {
