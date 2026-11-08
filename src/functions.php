@@ -37,6 +37,8 @@ if (!function_exists('ds')) {
         $line  = $trace['line'] ?? 0;
 
         $sendRequest = function ($args, LaraDumps $instance) use ($file, $line) {
+            $instance->setPassValues($args);
+
             if (!$args) {
                 return;
             }

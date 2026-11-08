@@ -44,6 +44,8 @@ class LaraDumps
 
     private ?string $pendingVariableName = null;
 
+    private array $passValues = [];
+
     public function __construct(
         private string $notificationId = '',
     ) {
@@ -147,6 +149,18 @@ class LaraDumps
         $this->send($payload);
 
         return $this;
+    }
+
+    public function setPassValues(array $values): self
+    {
+        $this->passValues = $values;
+
+        return $this;
+    }
+
+    public function pass(): mixed
+    {
+        return count($this->passValues) > 1 ? $this->passValues : ($this->passValues[0] ?? null);
     }
 
     /**

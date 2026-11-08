@@ -309,3 +309,15 @@ describe('LaraDumps::die() via subprocess', function () {
         expect(implode("\n", $output))->not->toContain('SHOULD_NOT_REACH');
     });
 });
+
+describe('ds()->pass()', function () {
+    it('returns the dumped value', function () {
+        LaraDumps::beforeSend(fn () => null);
+
+        expect(ds('foo')->pass())->toBe('foo')
+            ->and(ds('a', 'b')->pass())->toBe(['a', 'b'])
+            ->and(ds()->pass())->toBeNull();
+
+        LaraDumps::beforeSend(null);
+    });
+});
